@@ -1,0 +1,50 @@
+# =============================================================================
+# Module: backbone-deal
+# Entity: Campaign  (attribution master — moved here from backbone-crm, 2026-08-04)
+# Description: An outbound program + attribution source. Lightweight — a snapshot
+# of UTM attribution, NOT a marketing-automation engine (drip/scoring/journeys are
+# CUT for SMB). A Lead (→ backbone-lead) / Opportunity references its campaign as
+# a logical/intra-module FK; ROI is a downstream read model off OpportunityWon.
+# Posts NO GL.
+# =============================================================================
+
+models:
+  - name: Campaign
+    collection: campaigns
+    description: "An outbound program a lead/opportunity can be attributed to"
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique campaign id"
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Org owner # logical FK to organization.Company.id"
+      campaign_name:
+        type: string
+        attributes: ["@required", "@max(140)"]
+        description: "Human name"
+      utm_source:
+        type: string?
+        attributes: ["@max(80)"]
+        description: "Attribution source (e.g. whatsapp, instagram, referral)"
+      utm_medium:
+        type: string?
+        attributes: ["@max(80)"]
+        description: "Attribution medium"
+      utm_campaign:
+        type: string?
+        attributes: ["@max(120)"]
+        description: "Attribution campaign tag"
+      is_active:
+        type: bool
+        attributes: ["@default(true)"]
+        description: "Campaign is running"
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+    indexes:
+      - type: index
+        fields: [company_id, is_active]

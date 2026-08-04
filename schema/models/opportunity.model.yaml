@@ -1,0 +1,160 @@
+# =============================================================================
+# Module: backbone-deal
+# Entities: Opportunity (+ OpportunityItem)
+# Description: A qualified deal with a stage, probability, and expected value. Born
+# from a Lead (→ backbone-lead) or an existing party, it moves through sales stages
+# and exits, when WON, to backbone-selling as a Quotation/SO (`OpportunityWon`
+# event carrying the items) — `quotation_id` back-links the handoff. LOST records
+# a free-text reason + competitor. Posts NO GL (no money has moved yet).
+# Cross-module ids are logical FKs; OpportunityItem→Opportunity and
+# Opportunity→Campaign are INTRA-module real FKs.
+# =============================================================================
+
+models:
+  - name: Opportunity
+    collection: opportunities
+    description: "A qualified deal with stage/value/probability; hands off to selling when won"
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique opportunity id"
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Org owner # logical FK to organization.Company.id"
+      opportunity_name:
+        type: string
+        attributes: ["@required", "@max(140)"]
+        description: "Deal name"
+      lead_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "Originating lead (if born from one) # logical FK to lead.leads.id (cross-module)"
+      party_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "The customer/prospect # logical FK to party.Party.id"
+      campaign_id:
+        type: uuid?
+        attributes: ["@foreign_key(Campaign.id)"]
+        description: "Attributed campaign, snapshotted from the originating lead at qualify — the attribution link that lets won revenue roll up by campaign (INTRA-module real FK; Campaign lives in deal)"
+      currency:
+        type: string
+        attributes: ["@default('IDR')", "@length(3)"]
+        description: "Currency code"
+      expected_amount:
+        type: decimal
+        attributes: ["@default(0)", "@precision(18,2)", "@non_negative"]
+        description: "Σ item amounts (deal value)"
+      sales_stage:
+        type: SalesStage
+        attributes: ["@required", "@default(prospecting)"]
+        description: "Pipeline stage"
+      probability:
+        type: decimal
+        attributes: ["@default(0)", "@precision(5,2)", "@non_negative"]
+        description: "Win probability percent, 0..100"
+      expected_close_date:
+        type: datetime?
+        description: "Forecasted close date"
+      status:
+        type: OpportunityStatus
+        attributes: ["@required", "@default(open)"]
+        description: "open → won / lost"
+      quotation_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "The Quotation/SO created on win # logical FK to selling.SalesOrder.id"
+      lost_reason:
+        type: string?
+        attributes: ["@max(280)"]
+        description: "Why the deal was lost (free-text)"
+      competitor:
+        type: string?
+        attributes: ["@max(140)"]
+        description: "Competitor who won (free-text)"
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+    indexes:
+      - type: index
+        fields: [company_id, status, sales_stage]
+      - type: index
+        fields: [lead_id]
+      - type: index
+        fields: [party_id]
+      - type: index
+        fields: [campaign_id]
+
+  - name: OpportunityItem
+    collection: opportunity_items
+    description: "A line of interest on an opportunity (carried into the Quotation on win)"
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique line id"
+      opportunity_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Opportunity.id)"]
+        description: "Parent opportunity (INTRA-module real FK)"
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Org owner # logical FK to organization.Company.id (ADR-0010 fence)"
+      item_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Item of interest # logical FK to catalog.Product.id"
+      description:
+        type: string?
+        attributes: ["@max(280)"]
+        description: "Line description"
+      quantity:
+        type: decimal
+        attributes: ["@required", "@precision(18,4)", "@positive"]
+        description: "Quantity of interest"
+      rate:
+        type: decimal
+        attributes: ["@default(0)", "@precision(18,2)", "@non_negative"]
+        description: "Expected unit price"
+      amount:
+        type: decimal
+        attributes: ["@default(0)", "@precision(18,2)", "@non_negative"]
+        description: "quantity × rate"
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+    indexes:
+      - type: index
+        fields: [opportunity_id]
+
+enums:
+  - name: SalesStage
+    description: "Opportunity pipeline stage"
+    variants:
+      - name: prospecting
+        description: "Early — identifying"
+        default: true
+      - name: qualification
+        description: "Qualifying need/budget"
+      - name: proposal
+        description: "Proposal / quote sent"
+      - name: negotiation
+        description: "Negotiating terms"
+      - name: closing
+        description: "Closing"
+
+  - name: OpportunityStatus
+    description: "Opportunity terminal state"
+    variants:
+      - name: open
+        description: "In the pipeline"
+        default: true
+      - name: won
+        description: "Won — handed off to selling"
+      - name: lost
+        description: "Lost"
