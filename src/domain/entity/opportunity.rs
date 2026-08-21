@@ -74,7 +74,7 @@ pub struct Opportunity {
 impl Opportunity {
     /// Create a builder for Opportunity
     pub fn builder() -> OpportunityBuilder {
-        OpportunityBuilder::default()
+        <OpportunityBuilder as Default>::default()
     }
 
     /// Create a new Opportunity with required fields
@@ -445,10 +445,10 @@ impl OpportunityBuilder {
             campaign_id: self.campaign_id,
             currency: self.currency.unwrap_or("IDR".to_string()),
             expected_amount: self.expected_amount.unwrap_or(Decimal::from(0)),
-            sales_stage: self.sales_stage.unwrap_or(SalesStage::default()),
+            sales_stage: self.sales_stage.unwrap_or_default(),
             probability: self.probability.unwrap_or(Decimal::from(0)),
             expected_close_date: self.expected_close_date,
-            status: self.status.unwrap_or(OpportunityStatus::default()),
+            status: self.status.unwrap_or_default(),
             quotation_id: self.quotation_id,
             lost_reason: self.lost_reason,
             competitor: self.competitor,

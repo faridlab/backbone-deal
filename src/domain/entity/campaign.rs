@@ -2,6 +2,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
+
+use super::CampaignStatus;
 use super::AuditMetadata;
 
 /// Strongly-typed ID for Campaign
@@ -53,7 +55,7 @@ pub struct Campaign {
     pub utm_source: Option<String>,
     pub utm_medium: Option<String>,
     pub utm_campaign: Option<String>,
-    pub is_active: bool,
+    pub status: CampaignStatus,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -62,11 +64,11 @@ pub struct Campaign {
 impl Campaign {
     /// Create a builder for Campaign
     pub fn builder() -> CampaignBuilder {
-        CampaignBuilder::default()
+        <CampaignBuilder as Default>::default()
     }
 
     /// Create a new Campaign with required fields
-    pub fn new(company_id: Uuid, campaign_name: String, is_active: bool) -> Self {
+    pub fn new(company_id: Uuid, campaign_name: String, status: CampaignStatus) -> Self {
         Self {
             id: Uuid::new_v4(),
             company_id,
@@ -74,7 +76,7 @@ impl Campaign {
             utm_source: None,
             utm_medium: None,
             utm_campaign: None,
-            is_active,
+            status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -129,6 +131,11 @@ impl Campaign {
         self.metadata.deleted_by.as_ref()
     }
 
+    /// Get the current status
+    pub fn status(&self) -> &CampaignStatus {
+        &self.status
+    }
+
 
     // ==========================================================
     // Fluent Setters (with_* for optional fields)
@@ -175,8 +182,8 @@ impl Campaign {
                 "utm_campaign" => {
                     if let Ok(v) = serde_json::from_value(value) { self.utm_campaign = v; }
                 }
-                "is_active" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.is_active = v; }
+                "status" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.status = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -233,6 +240,7 @@ impl backbone_orm::EntityRepoMeta for Campaign {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
         m.insert("company_id".to_string(), "uuid".to_string());
+        m.insert("status".to_string(), "campaign_status".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
@@ -254,7 +262,7 @@ pub struct CampaignBuilder {
     utm_source: Option<String>,
     utm_medium: Option<String>,
     utm_campaign: Option<String>,
-    is_active: Option<bool>,
+    status: Option<CampaignStatus>,
 }
 
 impl CampaignBuilder {
@@ -288,9 +296,9 @@ impl CampaignBuilder {
         self
     }
 
-    /// Set the is_active field (default: `true`)
-    pub fn is_active(mut self, value: bool) -> Self {
-        self.is_active = Some(value);
+    /// Set the status field (default: `CampaignStatus::default()`)
+    pub fn status(mut self, value: CampaignStatus) -> Self {
+        self.status = Some(value);
         self
     }
 
@@ -308,7 +316,7 @@ impl CampaignBuilder {
             utm_source: self.utm_source,
             utm_medium: self.utm_medium,
             utm_campaign: self.utm_campaign,
-            is_active: self.is_active.unwrap_or(true),
+            status: self.status.unwrap_or_default(),
             metadata: AuditMetadata::default(),
         })
     }

@@ -10,6 +10,8 @@ mod opportunity_item_repository;
 
 // Custom persistence modules
 // <<< CUSTOM
+pub use opportunity_repository::{NewOpportunityRow, OpportunityForWinRow};
+pub use opportunity_item_repository::{NewOppItemRow, OppItemLineRow};
 // END CUSTOM
 
 // Re-exports
@@ -26,6 +28,4 @@ pub use backbone_orm::repository::{
 
 // Re-export custom persistence types
 // <<< CUSTOM
-pub use opportunity_repository::{NewOpportunityRow, OpportunityForWinRow};
-pub use opportunity_item_repository::{NewOppItemRow, OppItemLineRow};
 // END CUSTOM

@@ -37,14 +37,25 @@ models:
         type: string?
         attributes: ["@max(120)"]
         description: "Attribution campaign tag"
-      is_active:
-        type: bool
-        attributes: ["@default(true)"]
-        description: "Campaign is running"
+      # replaces is_active (boolean flipped to lifecycle enum)
+      status:
+        type: CampaignStatus
+        attributes: ["@default(active)"]
+        description: "Lifecycle (inactive campaigns stop attributing new leads; historical attributions keep their tag)"
       metadata:
         type: Metadata
         attributes: ["@audit_metadata"]
         description: "Audit metadata"
     indexes:
       - type: index
-        fields: [company_id, is_active]
+        fields: [company_id, status]
+
+enums:
+  - name: CampaignStatus
+    description: "Lifecycle of an attribution campaign"
+    variants:
+      - name: active
+        description: "Running; new leads may be attributed to it"
+        default: true
+      - name: inactive
+        description: "Stopped; historical attributions keep their tag"

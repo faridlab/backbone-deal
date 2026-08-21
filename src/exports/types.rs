@@ -54,7 +54,7 @@ pub struct CampaignDto {
     pub utm_source: Option<String>,
     pub utm_medium: Option<String>,
     pub utm_campaign: Option<String>,
-    pub is_active: bool,
+    pub status: CampaignStatus,
     pub metadata: serde_json::Value,
 }
 
@@ -63,6 +63,7 @@ pub struct CampaignDto {
 pub struct CampaignSummary {
     pub id: CampaignId,
     pub campaign_name: String,
+    pub status: CampaignStatus,
 }
 
 /// Reference to Campaign for foreign key relationships

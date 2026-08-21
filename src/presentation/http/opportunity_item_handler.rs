@@ -186,4 +186,3 @@ pub fn create_protected_opportunity_item_routes<A: AuthMiddleware + Send + Sync 
             }
         }))
 }
-

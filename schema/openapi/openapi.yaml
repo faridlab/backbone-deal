@@ -1125,7 +1125,7 @@ components:
         - id
         - company_id
         - campaign_name
-        - is_active
+        - status
         - metadata
       properties:
         id:
@@ -1149,8 +1149,8 @@ components:
           nullable: true
           type: string
           maxLength: 120
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -1172,7 +1172,7 @@ components:
       required:
         - company_id
         - campaign_name
-        - is_active
+        - status
         - metadata
       properties:
         company_id:
@@ -1193,8 +1193,8 @@ components:
           nullable: true
           type: string
           maxLength: 120
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -1203,7 +1203,7 @@ components:
       required:
         - company_id
         - campaign_name
-        - is_active
+        - status
         - metadata
       properties:
         company_id:
@@ -1224,8 +1224,8 @@ components:
           nullable: true
           type: string
           maxLength: 120
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 
@@ -1250,8 +1250,8 @@ components:
           nullable: true
           type: string
           maxLength: 120
-        is_active:
-          type: boolean
+        status:
+          type: string
         metadata:
           type: object
 

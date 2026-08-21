@@ -185,4 +185,3 @@ pub fn create_protected_campaign_routes<A: AuthMiddleware + Send + Sync + 'stati
             }
         }))
 }
-

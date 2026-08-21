@@ -64,7 +64,7 @@ pub struct OpportunityItem {
 impl OpportunityItem {
     /// Create a builder for OpportunityItem
     pub fn builder() -> OpportunityItemBuilder {
-        OpportunityItemBuilder::default()
+        <OpportunityItemBuilder as Default>::default()
     }
 
     /// Create a new OpportunityItem with required fields

@@ -29,7 +29,7 @@ impl TestDataGenerator for CampaignTestData {
             "utm_source": null,
             "utm_medium": null,
             "utm_campaign": null,
-            "is_active": false,
+            "status": "active",
             "metadata": json!({}),
         })
     }
@@ -43,7 +43,7 @@ impl TestDataGenerator for CampaignTestData {
             "utm_source": null,
             "utm_medium": null,
             "utm_campaign": null,
-            "is_active": false,
+            "status": "active",
             "metadata": json!({}),
         })
     }

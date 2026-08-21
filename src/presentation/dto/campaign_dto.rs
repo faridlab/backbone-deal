@@ -18,6 +18,7 @@ use validator::Validate;
 
 use crate::domain::entity::Campaign;
 use crate::domain::entity::AuditMetadata;
+use crate::domain::entity::CampaignStatus;
 
 // =============================================================================
 // Create DTO
@@ -48,9 +49,7 @@ pub struct CreateCampaignDto {
     #[cfg_attr(feature = "validation", validate(length(max = 120)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "utm_campaign")]
     pub utm_campaign: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: CampaignStatus,
 }
 
 // =============================================================================
@@ -82,9 +81,7 @@ pub struct UpdateCampaignDto {
     #[cfg_attr(feature = "validation", validate(length(max = 120)))]
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "utm_campaign")]
     pub utm_campaign: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_active")]
-    pub is_active: bool,
+    pub status: CampaignStatus,
 }
 
 // =============================================================================
@@ -116,15 +113,14 @@ pub struct PatchCampaignDto {
     #[cfg_attr(feature = "validation", validate(length(max = 120)))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "utm_campaign")]
     pub utm_campaign: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "is_active")]
-    pub is_active: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<CampaignStatus>,
 }
 
 impl PatchCampaignDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.company_id.is_some() || self.campaign_name.is_some() || self.utm_source.is_some() || self.utm_medium.is_some() || self.utm_campaign.is_some() || self.is_active.is_some()
+        self.company_id.is_some() || self.campaign_name.is_some() || self.utm_source.is_some() || self.utm_medium.is_some() || self.utm_campaign.is_some() || self.status.is_some()
     }
 }
 
@@ -149,8 +145,7 @@ pub struct CampaignResponseDto {
     pub utm_source: Option<String>,
     pub utm_medium: Option<String>,
     pub utm_campaign: Option<String>,
-    #[cfg_attr(feature = "openapi", schema(example = true))]
-    pub is_active: bool,
+    pub status: CampaignStatus,
     pub metadata: AuditMetadata,
 }
 
@@ -227,7 +222,7 @@ impl From<Campaign> for CampaignResponseDto {
             utm_source: entity.utm_source,
             utm_medium: entity.utm_medium,
             utm_campaign: entity.utm_campaign,
-            is_active: entity.is_active,
+            status: entity.status,
             metadata: entity.metadata,
         }
     }
@@ -255,7 +250,7 @@ impl From<CreateCampaignDto> for Campaign {
             utm_source: dto.utm_source,
             utm_medium: dto.utm_medium,
             utm_campaign: dto.utm_campaign,
-            is_active: dto.is_active,
+            status: dto.status,
             metadata: AuditMetadata::default(),
         }
     }
@@ -270,7 +265,7 @@ impl From<&Campaign> for CampaignResponseDto {
             utm_source: entity.utm_source.clone(),
             utm_medium: entity.utm_medium.clone(),
             utm_campaign: entity.utm_campaign.clone(),
-            is_active: entity.is_active.clone(),
+            status: entity.status.clone(),
             metadata: entity.metadata.clone(),
         }
     }
@@ -289,7 +284,7 @@ impl backbone_core::ApplyUpdateDto<UpdateCampaignDto> for Campaign {
         self.utm_source = dto.utm_source;
         self.utm_medium = dto.utm_medium;
         self.utm_campaign = dto.utm_campaign;
-        self.is_active = dto.is_active;
+        self.status = dto.status;
         Ok(self)
     }
 }
@@ -302,4 +297,3 @@ impl backbone_core::ApplyUpdateDto<UpdateCampaignDto> for Campaign {
 // Add custom DTOs specific to Campaign here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
-

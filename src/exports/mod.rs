@@ -8,7 +8,7 @@
 //! ## Usage from other modules
 //!
 //! ```text
-//! use deal::exports::{CampaignDto, DealQueryService};
+//! use deal::exports::{CampaignDto};
 //! ```
 
 mod types;
@@ -36,9 +36,6 @@ pub use events::*;
 /// - `OpportunityItemDto` - Data transfer object for OpportunityItem
 /// - `OpportunityItemSummary` - Summary view of OpportunityItem
 /// - `OpportunityItemId` - Type-safe ID wrapper
-///
-/// ## Public Services
-/// - `DealQueryService` - Read-only queries
 ///
 /// ## Public Events
 /// - `CampaignCreatedEvent` - Published when Campaign is created
