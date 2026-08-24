@@ -12,12 +12,14 @@ use super::{
     campaign_handler::create_campaign_routes,
     opportunity_handler::create_opportunity_routes,
     opportunity_item_handler::create_opportunity_item_routes,
+    stage_handler::create_stage_routes,
 };
 
 use crate::application::service::{
     CampaignService,
     OpportunityService,
     OpportunityItemService,
+    StageService,
 };
 
 /// Services collection for all CRUD endpoints
@@ -25,6 +27,7 @@ pub struct HttpServices {
     pub campaign: Arc<CampaignService>,
     pub opportunity: Arc<OpportunityService>,
     pub opportunity_item: Arc<OpportunityItemService>,
+    pub stage: Arc<StageService>,
 }
 
 /// Configure all HTTP routes for this module using Axum and BackboneCrudHandler.
@@ -50,6 +53,8 @@ pub fn configure_routes(services: HttpServices) -> Router {
         .merge(create_opportunity_routes(services.opportunity))
         // OpportunityItem routes (12 Backbone endpoints)
         .merge(create_opportunity_item_routes(services.opportunity_item))
+        // Stage routes (12 Backbone endpoints)
+        .merge(create_stage_routes(services.stage))
 }
 
 /// Create an individual entity's routes (for modular configuration)
@@ -66,6 +71,10 @@ pub mod individual {
 
     pub fn opportunity_item_routes(service: Arc<OpportunityItemService>) -> Router {
         create_opportunity_item_routes(service)
+    }
+
+    pub fn stage_routes(service: Arc<StageService>) -> Router {
+        create_stage_routes(service)
     }
 
 }

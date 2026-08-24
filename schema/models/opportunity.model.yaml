@@ -14,6 +14,9 @@ models:
   - name: Opportunity
     collection: opportunities
     description: "A qualified deal with stage/value/probability; hands off to selling when won"
+    relations:
+      stage:
+        type: Stage
     fields:
       id:
         type: uuid
@@ -39,6 +42,19 @@ models:
         type: uuid?
         attributes: ["@foreign_key(Campaign.id)"]
         description: "Attributed campaign, snapshotted from the originating lead at qualify — the attribution link that lets won revenue roll up by campaign (INTRA-module real FK; Campaign lives in deal)"
+      stage_id:
+        type: uuid
+        attributes: ["@required", "@foreign_key(Stage.id)"]
+        lifecycle: stage_ref
+        description: "Current pipeline stage # FK stages.id (in-module, stage_ref lifecycle — ADR-0016)"
+      owner_user_id:
+        type: uuid?
+        attributes: ["@foreign_key(sapiens.User.id)", "@exclude_from_foreign_key_check", "@indexed"]
+        description: "Assigned salesperson # logical FK sapiens.User.id"
+      sales_team_id:
+        type: uuid?
+        attributes: ["@exclude_from_foreign_key_check"]
+        description: "Assigned sales team # logical FK selling.sales_teams.id (logical uuid — no FK, no cargo edge to backbone-selling)"
       currency:
         type: string
         attributes: ["@default('IDR')", "@length(3)"]
@@ -47,21 +63,18 @@ models:
         type: decimal
         attributes: ["@default(0)", "@precision(18,2)", "@non_negative"]
         description: "Σ item amounts (deal value)"
-      sales_stage:
-        type: SalesStage
-        attributes: ["@required", "@default(prospecting)"]
-        description: "Pipeline stage"
       probability:
         type: decimal
         attributes: ["@default(0)", "@precision(5,2)", "@non_negative"]
-        description: "Win probability percent, 0..100"
+        description: "Win probability percent, 0..100 (CHECK-backstopped range)"
       expected_close_date:
         type: datetime?
         description: "Forecasted close date"
       status:
         type: OpportunityStatus
         attributes: ["@required", "@default(open)"]
-        description: "open → won / lost"
+        lifecycle: { shape: projection, driver: stage_id }
+        description: "DERIVED projection (ADR-0016), never hand-set: won ⇐ stage.is_won AND probability=100; lost ⇐ active=false AND probability=0; open otherwise"
       quotation_id:
         type: uuid?
         attributes: ["@exclude_from_foreign_key_check"]
@@ -74,13 +87,25 @@ models:
         type: string?
         attributes: ["@max(140)"]
         description: "Competitor who won (free-text)"
+      active:
+        type: boolean
+        attributes: ["@default(true)"]
+        description: "Archive mark — false means lost (with probability 0); NOT soft-delete"
+      date_last_stage_update:
+        type: datetime?
+        description: "Stamped on every stage change"
+      date_closed:
+        type: datetime?
+        description: "Stamped when probability reaches 100 or the row is archived; won→won moves never rewrite it"
       metadata:
         type: Metadata
         attributes: ["@audit_metadata"]
         description: "Audit metadata"
     indexes:
       - type: index
-        fields: [company_id, status, sales_stage]
+        fields: [company_id, status, stage_id]
+      - type: index
+        fields: [owner_user_id]
       - type: index
         fields: [lead_id]
       - type: index
@@ -133,23 +158,8 @@ models:
         fields: [opportunity_id]
 
 enums:
-  - name: SalesStage
-    description: "Opportunity pipeline stage"
-    variants:
-      - name: prospecting
-        description: "Early — identifying"
-        default: true
-      - name: qualification
-        description: "Qualifying need/budget"
-      - name: proposal
-        description: "Proposal / quote sent"
-      - name: negotiation
-        description: "Negotiating terms"
-      - name: closing
-        description: "Closing"
-
   - name: OpportunityStatus
-    description: "Opportunity terminal state"
+    description: "Opportunity terminal state (derived projection of stage/probability/active — never hand-set)"
     variants:
       - name: open
         description: "In the pipeline"

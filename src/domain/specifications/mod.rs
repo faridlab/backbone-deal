@@ -9,6 +9,7 @@ pub use backbone_core::{Specification, AndSpecification, OrSpecification, NotSpe
 pub mod campaign_specification;
 pub mod opportunity_specification;
 pub mod opportunity_item_specification;
+pub mod stage_specification;
 
 // <<< CUSTOM
 // END CUSTOM

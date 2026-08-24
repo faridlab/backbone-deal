@@ -8,10 +8,12 @@ pub use shared_types::{ValidationError, ValidationErrors, ValidationResult, Enti
 pub mod campaign_validator;
 pub mod opportunity_validator;
 pub mod opportunity_item_validator;
+pub mod stage_validator;
 
 pub use campaign_validator::{CampaignValidator, campaign_validator};
 pub use opportunity_validator::{OpportunityValidator, opportunity_validator};
 pub use opportunity_item_validator::{OpportunityItemValidator, opportunity_item_validator};
+pub use stage_validator::{StageValidator, stage_validator};
 
 // <<< CUSTOM
 // END CUSTOM

@@ -20,7 +20,6 @@ use validator::Validate;
 use crate::domain::entity::Opportunity;
 use crate::domain::entity::AuditMetadata;
 use crate::domain::entity::OpportunityStatus;
-use crate::domain::entity::SalesStage;
 
 // =============================================================================
 // Create DTO
@@ -48,12 +47,17 @@ pub struct CreateOpportunityDto {
     pub party_id: Option<Uuid>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "campaign_id")]
     pub campaign_id: Option<Uuid>,
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[serde(alias = "stage_id")]
+    pub stage_id: Uuid,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "owner_user_id")]
+    pub owner_user_id: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "sales_team_id")]
+    pub sales_team_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub currency: String,
     #[serde(alias = "expected_amount")]
     pub expected_amount: Decimal,
-    #[serde(alias = "sales_stage")]
-    pub sales_stage: SalesStage,
     pub probability: Decimal,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "expected_close_date")]
     pub expected_close_date: Option<DateTime<Utc>>,
@@ -66,6 +70,12 @@ pub struct CreateOpportunityDto {
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub competitor: Option<String>,
+    #[cfg_attr(feature = "openapi", schema(example = true))]
+    pub active: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "date_last_stage_update")]
+    pub date_last_stage_update: Option<DateTime<Utc>>,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "date_closed")]
+    pub date_closed: Option<DateTime<Utc>>,
 }
 
 // =============================================================================
@@ -94,12 +104,17 @@ pub struct UpdateOpportunityDto {
     pub party_id: Option<Uuid>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "campaign_id")]
     pub campaign_id: Option<Uuid>,
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[serde(alias = "stage_id")]
+    pub stage_id: Uuid,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "owner_user_id")]
+    pub owner_user_id: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "sales_team_id")]
+    pub sales_team_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub currency: String,
     #[serde(alias = "expected_amount")]
     pub expected_amount: Decimal,
-    #[serde(alias = "sales_stage")]
-    pub sales_stage: SalesStage,
     pub probability: Decimal,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "expected_close_date")]
     pub expected_close_date: Option<DateTime<Utc>>,
@@ -112,6 +127,12 @@ pub struct UpdateOpportunityDto {
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub competitor: Option<String>,
+    #[cfg_attr(feature = "openapi", schema(example = true))]
+    pub active: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "date_last_stage_update")]
+    pub date_last_stage_update: Option<DateTime<Utc>>,
+    #[serde(default, skip_serializing_if = "Option::is_none", alias = "date_closed")]
+    pub date_closed: Option<DateTime<Utc>>,
 }
 
 // =============================================================================
@@ -140,13 +161,18 @@ pub struct PatchOpportunityDto {
     pub party_id: Option<Uuid>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "campaign_id")]
     pub campaign_id: Option<Uuid>,
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    #[serde(skip_serializing_if = "Option::is_none", alias = "stage_id")]
+    pub stage_id: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none", alias = "owner_user_id")]
+    pub owner_user_id: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none", alias = "sales_team_id")]
+    pub sales_team_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub currency: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "expected_amount")]
     pub expected_amount: Option<Decimal>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "sales_stage")]
-    pub sales_stage: Option<SalesStage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub probability: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "expected_close_date")]
@@ -161,12 +187,19 @@ pub struct PatchOpportunityDto {
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub competitor: Option<String>,
+    #[cfg_attr(feature = "openapi", schema(example = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none", alias = "date_last_stage_update")]
+    pub date_last_stage_update: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none", alias = "date_closed")]
+    pub date_closed: Option<DateTime<Utc>>,
 }
 
 impl PatchOpportunityDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.company_id.is_some() || self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.currency.is_some() || self.expected_amount.is_some() || self.sales_stage.is_some() || self.probability.is_some() || self.expected_close_date.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some()
+        self.company_id.is_some() || self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.stage_id.is_some() || self.owner_user_id.is_some() || self.sales_team_id.is_some() || self.currency.is_some() || self.expected_amount.is_some() || self.probability.is_some() || self.expected_close_date.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some() || self.active.is_some() || self.date_last_stage_update.is_some() || self.date_closed.is_some()
     }
 }
 
@@ -191,16 +224,23 @@ pub struct OpportunityResponseDto {
     pub lead_id: Option<Uuid>,
     pub party_id: Option<Uuid>,
     pub campaign_id: Option<Uuid>,
+    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
+    pub stage_id: Uuid,
+    pub owner_user_id: Option<Uuid>,
+    pub sales_team_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub currency: String,
     pub expected_amount: Decimal,
-    pub sales_stage: SalesStage,
     pub probability: Decimal,
     pub expected_close_date: Option<DateTime<Utc>>,
     pub status: OpportunityStatus,
     pub quotation_id: Option<Uuid>,
     pub lost_reason: Option<String>,
     pub competitor: Option<String>,
+    #[cfg_attr(feature = "openapi", schema(example = true))]
+    pub active: bool,
+    pub date_last_stage_update: Option<DateTime<Utc>>,
+    pub date_closed: Option<DateTime<Utc>>,
     pub metadata: AuditMetadata,
 }
 
@@ -277,15 +317,20 @@ impl From<Opportunity> for OpportunityResponseDto {
             lead_id: entity.lead_id,
             party_id: entity.party_id,
             campaign_id: entity.campaign_id,
+            stage_id: entity.stage_id,
+            owner_user_id: entity.owner_user_id,
+            sales_team_id: entity.sales_team_id,
             currency: entity.currency,
             expected_amount: entity.expected_amount,
-            sales_stage: entity.sales_stage,
             probability: entity.probability,
             expected_close_date: entity.expected_close_date,
             status: entity.status,
             quotation_id: entity.quotation_id,
             lost_reason: entity.lost_reason,
             competitor: entity.competitor,
+            active: entity.active,
+            date_last_stage_update: entity.date_last_stage_update,
+            date_closed: entity.date_closed,
             metadata: entity.metadata,
         }
     }
@@ -313,15 +358,20 @@ impl From<CreateOpportunityDto> for Opportunity {
             lead_id: dto.lead_id,
             party_id: dto.party_id,
             campaign_id: dto.campaign_id,
+            stage_id: dto.stage_id,
+            owner_user_id: dto.owner_user_id,
+            sales_team_id: dto.sales_team_id,
             currency: dto.currency,
             expected_amount: dto.expected_amount,
-            sales_stage: dto.sales_stage,
             probability: dto.probability,
             expected_close_date: dto.expected_close_date,
             status: dto.status,
             quotation_id: dto.quotation_id,
             lost_reason: dto.lost_reason,
             competitor: dto.competitor,
+            active: dto.active,
+            date_last_stage_update: dto.date_last_stage_update,
+            date_closed: dto.date_closed,
             metadata: AuditMetadata::default(),
         }
     }
@@ -336,15 +386,20 @@ impl From<&Opportunity> for OpportunityResponseDto {
             lead_id: entity.lead_id.clone(),
             party_id: entity.party_id.clone(),
             campaign_id: entity.campaign_id.clone(),
+            stage_id: entity.stage_id.clone(),
+            owner_user_id: entity.owner_user_id.clone(),
+            sales_team_id: entity.sales_team_id.clone(),
             currency: entity.currency.clone(),
             expected_amount: entity.expected_amount.clone(),
-            sales_stage: entity.sales_stage.clone(),
             probability: entity.probability.clone(),
             expected_close_date: entity.expected_close_date.clone(),
             status: entity.status.clone(),
             quotation_id: entity.quotation_id.clone(),
             lost_reason: entity.lost_reason.clone(),
             competitor: entity.competitor.clone(),
+            active: entity.active.clone(),
+            date_last_stage_update: entity.date_last_stage_update.clone(),
+            date_closed: entity.date_closed.clone(),
             metadata: entity.metadata.clone(),
         }
     }
@@ -363,15 +418,20 @@ impl backbone_core::ApplyUpdateDto<UpdateOpportunityDto> for Opportunity {
         self.lead_id = dto.lead_id;
         self.party_id = dto.party_id;
         self.campaign_id = dto.campaign_id;
+        self.stage_id = dto.stage_id;
+        self.owner_user_id = dto.owner_user_id;
+        self.sales_team_id = dto.sales_team_id;
         self.currency = dto.currency;
         self.expected_amount = dto.expected_amount;
-        self.sales_stage = dto.sales_stage;
         self.probability = dto.probability;
         self.expected_close_date = dto.expected_close_date;
         self.status = dto.status;
         self.quotation_id = dto.quotation_id;
         self.lost_reason = dto.lost_reason;
         self.competitor = dto.competitor;
+        self.active = dto.active;
+        self.date_last_stage_update = dto.date_last_stage_update;
+        self.date_closed = dto.date_closed;
         Ok(self)
     }
 }

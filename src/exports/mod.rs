@@ -36,6 +36,9 @@ pub use events::*;
 /// - `OpportunityItemDto` - Data transfer object for OpportunityItem
 /// - `OpportunityItemSummary` - Summary view of OpportunityItem
 /// - `OpportunityItemId` - Type-safe ID wrapper
+/// - `StageDto` - Data transfer object for Stage
+/// - `StageSummary` - Summary view of Stage
+/// - `StageId` - Type-safe ID wrapper
 ///
 /// ## Public Events
 /// - `CampaignCreatedEvent` - Published when Campaign is created
@@ -47,4 +50,7 @@ pub use events::*;
 /// - `OpportunityItemCreatedEvent` - Published when OpportunityItem is created
 /// - `OpportunityItemUpdatedEvent` - Published when OpportunityItem is updated
 /// - `OpportunityItemDeletedEvent` - Published when OpportunityItem is deleted
+/// - `StageCreatedEvent` - Published when Stage is created
+/// - `StageUpdatedEvent` - Published when Stage is updated
+/// - `StageDeletedEvent` - Published when Stage is deleted
 pub struct ExportSummary;

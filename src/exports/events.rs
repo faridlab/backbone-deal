@@ -92,6 +92,33 @@ pub struct OpportunityItemDeletedEvent {
 }
 
 // ============================================================================
+// STAGE EVENTS
+// ============================================================================
+
+/// Event published when a Stage is created
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StageCreatedEvent {
+    pub id: StageId,
+    pub data: StageDto,
+    pub occurred_at: DateTime<Utc>,
+}
+
+/// Event published when a Stage is updated
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StageUpdatedEvent {
+    pub id: StageId,
+    pub data: StageDto,
+    pub occurred_at: DateTime<Utc>,
+}
+
+/// Event published when a Stage is deleted
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StageDeletedEvent {
+    pub id: StageId,
+    pub occurred_at: DateTime<Utc>,
+}
+
+// ============================================================================
 // MODULE EVENT ENUM
 // ============================================================================
 
@@ -108,6 +135,9 @@ pub enum DealEvent {
     OpportunityItemCreated(OpportunityItemCreatedEvent),
     OpportunityItemUpdated(OpportunityItemUpdatedEvent),
     OpportunityItemDeleted(OpportunityItemDeletedEvent),
+    StageCreated(StageCreatedEvent),
+    StageUpdated(StageUpdatedEvent),
+    StageDeleted(StageDeletedEvent),
 }
 
 /// Metadata for module events

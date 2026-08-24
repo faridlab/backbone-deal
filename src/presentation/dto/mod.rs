@@ -8,6 +8,7 @@
 pub mod campaign_dto;
 pub mod opportunity_dto;
 pub mod opportunity_item_dto;
+pub mod stage_dto;
 
 // Re-exports
 pub use campaign_dto::{
@@ -33,6 +34,14 @@ pub use opportunity_item_dto::{
     OpportunityItemResponseDto,
     OpportunityItemListResponseDto,
     OpportunityItemSummaryDto,
+};
+pub use stage_dto::{
+    CreateStageDto,
+    UpdateStageDto,
+    PatchStageDto,
+    StageResponseDto,
+    StageListResponseDto,
+    StageSummaryDto,
 };
 
 // Common pagination types

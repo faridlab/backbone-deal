@@ -10,3 +10,6 @@
 - campaign_seed
 - opportunity_seed
 - opportunity_item_seed
+
+# Newly added seeds (preserve manual order above):
+- stage_seed

@@ -14,6 +14,9 @@ version: 2
 schema: deal
 description: "sales pipeline — opportunity + items + campaign attribution; posts no GL"
 
+# ADR-0014 posture: every table carries company_id and the ADR-0008 RLS fence.
+company_fence: strict
+
 config:
   database: postgresql
   soft_delete: true
@@ -64,3 +67,4 @@ shared_types:
 imports:
   - opportunity.model.yaml
   - campaign.model.yaml
+  - stage.model.yaml

@@ -8,13 +8,17 @@
 pub mod campaign_handler;
 pub mod opportunity_handler;
 pub mod opportunity_item_handler;
+pub mod stage_handler;
 
 // <<< CUSTOM
+pub mod guarded_routes;
 // END CUSTOM
 
 // Re-exports
 pub use campaign_handler::{create_campaign_routes, create_campaign_read_routes, create_campaign_write_routes};
 pub use opportunity_handler::{create_opportunity_routes, create_opportunity_read_routes, create_opportunity_write_routes};
 pub use opportunity_item_handler::{create_opportunity_item_routes, create_opportunity_item_read_routes, create_opportunity_item_write_routes};
+pub use stage_handler::{create_stage_routes, create_stage_read_routes, create_stage_write_routes};
 // <<< CUSTOM
+pub use guarded_routes::create_guarded_deal_routes;
 // END CUSTOM

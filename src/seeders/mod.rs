@@ -12,10 +12,12 @@ use sqlx::PgPool;
 mod campaign_seeder;
 mod opportunity_seeder;
 mod opportunity_item_seeder;
+mod stage_seeder;
 
 pub use campaign_seeder::SeedCampaignSeeder;
 pub use opportunity_seeder::SeedOpportunitySeeder;
 pub use opportunity_item_seeder::SeedOpportunityItemSeeder;
+pub use stage_seeder::SeedStageSeeder;
 
 // ============================================================================
 // SEEDER TRAIT

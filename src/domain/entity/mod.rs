@@ -5,8 +5,8 @@
 pub mod campaign;
 pub mod opportunity;
 pub mod opportunity_item;
+pub mod stage;
 pub mod campaign_status;
-pub mod sales_stage;
 pub mod opportunity_status;
 
 // Re-exports
@@ -19,8 +19,10 @@ pub use opportunity::OpportunityId;
 pub use opportunity_item::OpportunityItem;
 pub use opportunity_item::OpportunityItemBuilder;
 pub use opportunity_item::OpportunityItemId;
+pub use stage::Stage;
+pub use stage::StageBuilder;
+pub use stage::StageId;
 pub use campaign_status::CampaignStatus;
-pub use sales_stage::SalesStage;
 pub use opportunity_status::OpportunityStatus;
 
 // ==========================================================================

@@ -4,7 +4,6 @@ use sqlx::FromRow;
 use uuid::Uuid;
 use rust_decimal::Decimal;
 
-use super::SalesStage;
 use super::OpportunityStatus;
 use super::AuditMetadata;
 
@@ -57,15 +56,20 @@ pub struct Opportunity {
     pub lead_id: Option<Uuid>,
     pub party_id: Option<Uuid>,
     pub campaign_id: Option<Uuid>,
+    pub stage_id: Uuid,
+    pub owner_user_id: Option<Uuid>,
+    pub sales_team_id: Option<Uuid>,
     pub currency: String,
     pub expected_amount: Decimal,
-    pub sales_stage: SalesStage,
     pub probability: Decimal,
     pub expected_close_date: Option<DateTime<Utc>>,
     pub status: OpportunityStatus,
     pub quotation_id: Option<Uuid>,
     pub lost_reason: Option<String>,
     pub competitor: Option<String>,
+    pub active: bool,
+    pub date_last_stage_update: Option<DateTime<Utc>>,
+    pub date_closed: Option<DateTime<Utc>>,
     #[serde(default)]
     #[sqlx(json)]
     pub metadata: AuditMetadata,
@@ -78,7 +82,7 @@ impl Opportunity {
     }
 
     /// Create a new Opportunity with required fields
-    pub fn new(company_id: Uuid, opportunity_name: String, currency: String, expected_amount: Decimal, sales_stage: SalesStage, probability: Decimal, status: OpportunityStatus) -> Self {
+    pub fn new(company_id: Uuid, opportunity_name: String, stage_id: Uuid, currency: String, expected_amount: Decimal, probability: Decimal, status: OpportunityStatus, active: bool) -> Self {
         Self {
             id: Uuid::new_v4(),
             company_id,
@@ -86,15 +90,20 @@ impl Opportunity {
             lead_id: None,
             party_id: None,
             campaign_id: None,
+            stage_id,
+            owner_user_id: None,
+            sales_team_id: None,
             currency,
             expected_amount,
-            sales_stage,
             probability,
             expected_close_date: None,
             status,
             quotation_id: None,
             lost_reason: None,
             competitor: None,
+            active,
+            date_last_stage_update: None,
+            date_closed: None,
             metadata: AuditMetadata::default(),
         }
     }
@@ -177,6 +186,18 @@ impl Opportunity {
         self
     }
 
+    /// Set the owner_user_id field (chainable)
+    pub fn with_owner_user_id(mut self, value: Uuid) -> Self {
+        self.owner_user_id = Some(value);
+        self
+    }
+
+    /// Set the sales_team_id field (chainable)
+    pub fn with_sales_team_id(mut self, value: Uuid) -> Self {
+        self.sales_team_id = Some(value);
+        self
+    }
+
     /// Set the expected_close_date field (chainable)
     pub fn with_expected_close_date(mut self, value: DateTime<Utc>) -> Self {
         self.expected_close_date = Some(value);
@@ -198,6 +219,18 @@ impl Opportunity {
     /// Set the competitor field (chainable)
     pub fn with_competitor(mut self, value: String) -> Self {
         self.competitor = Some(value);
+        self
+    }
+
+    /// Set the date_last_stage_update field (chainable)
+    pub fn with_date_last_stage_update(mut self, value: DateTime<Utc>) -> Self {
+        self.date_last_stage_update = Some(value);
+        self
+    }
+
+    /// Set the date_closed field (chainable)
+    pub fn with_date_closed(mut self, value: DateTime<Utc>) -> Self {
+        self.date_closed = Some(value);
         self
     }
 
@@ -224,14 +257,20 @@ impl Opportunity {
                 "campaign_id" => {
                     if let Ok(v) = serde_json::from_value(value) { self.campaign_id = v; }
                 }
+                "stage_id" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.stage_id = v; }
+                }
+                "owner_user_id" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.owner_user_id = v; }
+                }
+                "sales_team_id" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.sales_team_id = v; }
+                }
                 "currency" => {
                     if let Ok(v) = serde_json::from_value(value) { self.currency = v; }
                 }
                 "expected_amount" => {
                     if let Ok(v) = serde_json::from_value(value) { self.expected_amount = v; }
-                }
-                "sales_stage" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.sales_stage = v; }
                 }
                 "probability" => {
                     if let Ok(v) = serde_json::from_value(value) { self.probability = v; }
@@ -250,6 +289,15 @@ impl Opportunity {
                 }
                 "competitor" => {
                     if let Ok(v) = serde_json::from_value(value) { self.competitor = v; }
+                }
+                "active" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.active = v; }
+                }
+                "date_last_stage_update" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.date_last_stage_update = v; }
+                }
+                "date_closed" => {
+                    if let Ok(v) = serde_json::from_value(value) { self.date_closed = v; }
                 }
                 _ => {} // ignore unknown fields
             }
@@ -309,8 +357,10 @@ impl backbone_orm::EntityRepoMeta for Opportunity {
         m.insert("lead_id".to_string(), "uuid".to_string());
         m.insert("party_id".to_string(), "uuid".to_string());
         m.insert("campaign_id".to_string(), "uuid".to_string());
+        m.insert("stage_id".to_string(), "uuid".to_string());
+        m.insert("owner_user_id".to_string(), "uuid".to_string());
+        m.insert("sales_team_id".to_string(), "uuid".to_string());
         m.insert("quotation_id".to_string(), "uuid".to_string());
-        m.insert("sales_stage".to_string(), "sales_stage".to_string());
         m.insert("status".to_string(), "opportunity_status".to_string());
         m
     }
@@ -333,15 +383,20 @@ pub struct OpportunityBuilder {
     lead_id: Option<Uuid>,
     party_id: Option<Uuid>,
     campaign_id: Option<Uuid>,
+    stage_id: Option<Uuid>,
+    owner_user_id: Option<Uuid>,
+    sales_team_id: Option<Uuid>,
     currency: Option<String>,
     expected_amount: Option<Decimal>,
-    sales_stage: Option<SalesStage>,
     probability: Option<Decimal>,
     expected_close_date: Option<DateTime<Utc>>,
     status: Option<OpportunityStatus>,
     quotation_id: Option<Uuid>,
     lost_reason: Option<String>,
     competitor: Option<String>,
+    active: Option<bool>,
+    date_last_stage_update: Option<DateTime<Utc>>,
+    date_closed: Option<DateTime<Utc>>,
 }
 
 impl OpportunityBuilder {
@@ -375,6 +430,24 @@ impl OpportunityBuilder {
         self
     }
 
+    /// Set the stage_id field (required)
+    pub fn stage_id(mut self, value: Uuid) -> Self {
+        self.stage_id = Some(value);
+        self
+    }
+
+    /// Set the owner_user_id field (optional)
+    pub fn owner_user_id(mut self, value: Uuid) -> Self {
+        self.owner_user_id = Some(value);
+        self
+    }
+
+    /// Set the sales_team_id field (optional)
+    pub fn sales_team_id(mut self, value: Uuid) -> Self {
+        self.sales_team_id = Some(value);
+        self
+    }
+
     /// Set the currency field (default: `"IDR".to_string()`)
     pub fn currency(mut self, value: String) -> Self {
         self.currency = Some(value);
@@ -384,12 +457,6 @@ impl OpportunityBuilder {
     /// Set the expected_amount field (default: `Decimal::from(0)`)
     pub fn expected_amount(mut self, value: Decimal) -> Self {
         self.expected_amount = Some(value);
-        self
-    }
-
-    /// Set the sales_stage field (default: `SalesStage::default()`)
-    pub fn sales_stage(mut self, value: SalesStage) -> Self {
-        self.sales_stage = Some(value);
         self
     }
 
@@ -429,12 +496,31 @@ impl OpportunityBuilder {
         self
     }
 
+    /// Set the active field (default: `true`)
+    pub fn active(mut self, value: bool) -> Self {
+        self.active = Some(value);
+        self
+    }
+
+    /// Set the date_last_stage_update field (optional)
+    pub fn date_last_stage_update(mut self, value: DateTime<Utc>) -> Self {
+        self.date_last_stage_update = Some(value);
+        self
+    }
+
+    /// Set the date_closed field (optional)
+    pub fn date_closed(mut self, value: DateTime<Utc>) -> Self {
+        self.date_closed = Some(value);
+        self
+    }
+
     /// Build the Opportunity entity
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<Opportunity, String> {
         let company_id = self.company_id.ok_or_else(|| "company_id is required".to_string())?;
         let opportunity_name = self.opportunity_name.ok_or_else(|| "opportunity_name is required".to_string())?;
+        let stage_id = self.stage_id.ok_or_else(|| "stage_id is required".to_string())?;
 
         Ok(Opportunity {
             id: Uuid::new_v4(),
@@ -443,15 +529,20 @@ impl OpportunityBuilder {
             lead_id: self.lead_id,
             party_id: self.party_id,
             campaign_id: self.campaign_id,
+            stage_id,
+            owner_user_id: self.owner_user_id,
+            sales_team_id: self.sales_team_id,
             currency: self.currency.unwrap_or("IDR".to_string()),
             expected_amount: self.expected_amount.unwrap_or(Decimal::from(0)),
-            sales_stage: self.sales_stage.unwrap_or_default(),
             probability: self.probability.unwrap_or(Decimal::from(0)),
             expected_close_date: self.expected_close_date,
             status: self.status.unwrap_or_default(),
             quotation_id: self.quotation_id,
             lost_reason: self.lost_reason,
             competitor: self.competitor,
+            active: self.active.unwrap_or(true),
+            date_last_stage_update: self.date_last_stage_update,
+            date_closed: self.date_closed,
             metadata: AuditMetadata::default(),
         })
     }

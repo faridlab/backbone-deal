@@ -1,6 +1,6 @@
 [package]
 name = "backbone-deal"
-version = "0.1.6"
+version = "0.2.0"
 edition = "2021"
 description = "Sales pipeline — opportunity + items + campaign attribution; posts no GL"
 
@@ -19,7 +19,7 @@ path = "src/lib.rs"
 # -----------------------------------------------------------------------------
 backbone-core = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.9", features = ["postgres"] }
 backbone-orm = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.9" }
-backbone-auth = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.9" }
+backbone-auth = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.9", features = ["axum"] }
 backbone-messaging = { git = "https://github.com/faridlab/backbone-framework", tag = "v2.7.9" }
 
 # Core async runtime and serialization
@@ -27,7 +27,7 @@ tokio = { version = "1.0", features = ["full"] }
 async-trait = "0.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-uuid = { version = "1.0", features = ["v4", "serde"] }
+uuid = { version = "1.0", features = ["v4", "v5", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 # Money/quantities — near-universal in domain modules. Generated code for any `decimal`
 # field imports rust_decimal, so ship it (and the matching sqlx feature) by default.

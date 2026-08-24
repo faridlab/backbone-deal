@@ -7,10 +7,13 @@
 mod campaign_repository;
 mod opportunity_repository;
 mod opportunity_item_repository;
+mod stage_repository;
 
 // Custom persistence modules
 // <<< CUSTOM
-pub use opportunity_repository::{NewOpportunityRow, OpportunityForWinRow};
+pub use opportunity_repository::{
+    DEFAULT_STAGES, NewOpportunityRow, OpportunityForWinRow, StageMoveRow, StageProbeRow,
+};
 pub use opportunity_item_repository::{NewOppItemRow, OppItemLineRow};
 // END CUSTOM
 
@@ -18,6 +21,7 @@ pub use opportunity_item_repository::{NewOppItemRow, OppItemLineRow};
 pub use campaign_repository::CampaignRepository;
 pub use opportunity_repository::OpportunityRepository;
 pub use opportunity_item_repository::OpportunityItemRepository;
+pub use stage_repository::StageRepository;
 
 // Re-export backbone-orm types
 pub use backbone_orm::repository::{

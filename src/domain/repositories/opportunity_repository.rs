@@ -9,7 +9,7 @@ use async_trait::async_trait;
 use anyhow::Result;
 use uuid::Uuid;
 
-use crate::domain::entity::{Opportunity, OpportunityStatus, SalesStage};
+use crate::domain::entity::{Opportunity, OpportunityStatus};
 
 /// Pagination parameters for list queries
 #[derive(Debug, Clone, Default)]
@@ -49,18 +49,21 @@ pub struct OpportunityFilter {
     pub lead_id: Option<Uuid>,
     pub party_id: Option<Uuid>,
     pub campaign_id: Option<Uuid>,
+    pub stage_id: Option<Uuid>,
+    pub owner_user_id: Option<Uuid>,
+    pub sales_team_id: Option<Uuid>,
     pub currency: Option<String>,
-    pub sales_stage: Option<SalesStage>,
     pub status: Option<OpportunityStatus>,
     pub quotation_id: Option<Uuid>,
     pub lost_reason: Option<String>,
     pub competitor: Option<String>,
+    pub active: Option<bool>,
 }
 
 impl OpportunityFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.company_id.is_some() || self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.currency.is_some() || self.sales_stage.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some()
+        self.company_id.is_some() || self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.stage_id.is_some() || self.owner_user_id.is_some() || self.sales_team_id.is_some() || self.currency.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some() || self.active.is_some()
     }
 }
 

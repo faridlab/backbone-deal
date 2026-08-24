@@ -15,6 +15,7 @@ use std::env;
 use backbone_deal::seeders::SeedCampaignSeeder;
 use backbone_deal::seeders::SeedOpportunitySeeder;
 use backbone_deal::seeders::SeedOpportunityItemSeeder;
+use backbone_deal::seeders::SeedStageSeeder;
 use backbone_deal::seeders::Seeder;
 
 #[tokio::main]
@@ -46,6 +47,7 @@ async fn main() -> Result<()> {
     seeders.push(Box::new(SeedCampaignSeeder::new()));
     seeders.push(Box::new(SeedOpportunitySeeder::new()));
     seeders.push(Box::new(SeedOpportunityItemSeeder::new()));
+    seeders.push(Box::new(SeedStageSeeder::new()));
 
     // Sort by order
     seeders.sort_by_key(|s| s.order());

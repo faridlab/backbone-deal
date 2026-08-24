@@ -29,15 +29,20 @@ impl TestDataGenerator for OpportunityTestData {
             "lead_id": null,
             "party_id": null,
             "campaign_id": null,
+            "stage_id": Uuid::new_v4().to_string(),
+            "owner_user_id": null,
+            "sales_team_id": null,
             "currency": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "expected_amount": 0,
-            "sales_stage": "prospecting",
             "probability": 0,
             "expected_close_date": null,
             "status": "open",
             "quotation_id": null,
             "lost_reason": null,
             "competitor": null,
+            "active": false,
+            "date_last_stage_update": null,
+            "date_closed": null,
             "metadata": json!({}),
         })
     }
@@ -51,15 +56,20 @@ impl TestDataGenerator for OpportunityTestData {
             "lead_id": null,
             "party_id": null,
             "campaign_id": null,
+            "stage_id": Uuid::new_v4().to_string(),
+            "owner_user_id": null,
+            "sales_team_id": null,
             "currency": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "expected_amount": 0,
-            "sales_stage": "prospecting",
             "probability": 0,
             "expected_close_date": null,
             "status": "open",
             "quotation_id": null,
             "lost_reason": null,
             "competitor": null,
+            "active": false,
+            "date_last_stage_update": null,
+            "date_closed": null,
             "metadata": json!({}),
         })
     }
@@ -68,6 +78,14 @@ impl TestDataGenerator for OpportunityTestData {
         json!({
             // Missing required fields
         })
+    }
+
+    async fn seed_dependencies(&self, api: &ApiTest) -> Vec<(String, String)> {
+        let mut deps: Vec<(String, String)> = Vec::new();
+        if let Some(id) = super::crud_test_base::create_and_get_id(api, "/api/v1/stages", &super::stage_api_test::StageTestData).await {
+            deps.push(("stage_id".to_string(), id));
+        }
+        deps
     }
 }
 

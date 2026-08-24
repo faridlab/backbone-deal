@@ -115,15 +115,20 @@ pub struct OpportunityDto {
     pub lead_id: Option<Uuid>,
     pub party_id: Option<Uuid>,
     pub campaign_id: Option<Uuid>,
+    pub stage_id: Uuid,
+    pub owner_user_id: Option<Uuid>,
+    pub sales_team_id: Option<Uuid>,
     pub currency: String,
     pub expected_amount: Decimal,
-    pub sales_stage: SalesStage,
     pub probability: Decimal,
     pub expected_close_date: Option<DateTime<Utc>>,
     pub status: OpportunityStatus,
     pub quotation_id: Option<Uuid>,
     pub lost_reason: Option<String>,
     pub competitor: Option<String>,
+    pub active: bool,
+    pub date_last_stage_update: Option<DateTime<Utc>>,
+    pub date_closed: Option<DateTime<Utc>>,
     pub metadata: serde_json::Value,
 }
 
@@ -199,6 +204,67 @@ pub struct OpportunityItemSummary {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OpportunityItemRef {
     pub id: OpportunityItemId,
+}
+
+// ============================================================================
+// STAGE TYPES
+// ============================================================================
+
+/// Type-safe ID for Stage
+///
+/// Use this instead of raw Uuid for type safety across modules.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct StageId(pub Uuid);
+
+impl StageId {
+    pub fn new(id: Uuid) -> Self {
+        Self(id)
+    }
+
+    pub fn into_inner(self) -> Uuid {
+        self.0
+    }
+}
+
+impl From<Uuid> for StageId {
+    fn from(id: Uuid) -> Self {
+        Self(id)
+    }
+}
+
+impl From<StageId> for Uuid {
+    fn from(id: StageId) -> Self {
+        id.0
+    }
+}
+
+/// Data transfer object for Stage
+///
+/// This is the public representation of Stage for other modules.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StageDto {
+    pub id: StageId,
+    pub company_id: Uuid,
+    pub code: String,
+    pub name: String,
+    pub sequence: i32,
+    pub is_won: bool,
+    pub probability_hint: Decimal,
+    pub active: bool,
+    pub metadata: serde_json::Value,
+}
+
+/// Summary view of Stage for list displays
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StageSummary {
+    pub id: StageId,
+    pub name: String,
+}
+
+/// Reference to Stage for foreign key relationships
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StageRef {
+    pub id: StageId,
 }
 
 // ============================================================================

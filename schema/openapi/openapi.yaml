@@ -17,6 +17,8 @@ tags:
     description: Opportunity management endpoints
   - name: OpportunityItems
     description: OpportunityItem management endpoints
+  - name: Stages
+    description: Stage management endpoints
 
 paths:
   /api/v1/campaigns:
@@ -1117,6 +1119,372 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
+  /api/v1/stages:
+    get:
+      tags:
+        - Stages
+      summary: List Stages
+      description: Get a paginated list of Stages with optional filtering and sorting
+      operationId: listStages
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortOrderParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Stages
+      summary: Create Stage
+      description: Create a new Stage
+      operationId: createStage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStageRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/stages/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+
+    get:
+      tags:
+        - Stages
+      summary: Get Stage by ID
+      operationId: getStage
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Stages
+      summary: Update Stage (full)
+      operationId: updateStage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStageRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Stages
+      summary: Update Stage (partial)
+      operationId: patchStage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchStageRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Stages
+      summary: Delete Stage (soft)
+      operationId: deleteStage
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/stages/bulk:
+    post:
+      tags:
+        - Stages
+      summary: Bulk create Stages
+      operationId: bulkCreateStages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateStageRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stage'
+    put:
+      tags:
+        - Stages
+      summary: Bulk update Stages (full, atomic)
+      operationId: bulkUpdateStages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - type: object
+                    required: [id]
+                    properties:
+                      id:
+                        type: string
+                  - $ref: '#/components/schemas/UpdateStageRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageBulkResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    patch:
+      tags:
+        - Stages
+      summary: Bulk partial-update Stages (atomic)
+      operationId: bulkPatchStages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [ids, patch]
+                  properties:
+                    ids:
+                      type: array
+                      items: { type: string }
+                    patch:
+                      type: object
+                      additionalProperties: true
+                - type: object
+                  required: [items]
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        type: object
+                        required: [id, patch]
+                        properties:
+                          id: { type: string }
+                          patch: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageBulkResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/stages/upsert:
+    post:
+      tags:
+        - Stages
+      summary: Upsert Stage
+      operationId: upsertStage
+      parameters:
+        - name: key_field
+          in: query
+          schema:
+            type: string
+        - name: key_value
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStageRequest'
+      responses:
+        '200':
+          description: Upserted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stage'
+
+  /api/v1/stages/trash:
+    get:
+      tags:
+        - Stages
+      summary: List deleted Stages
+      operationId: listDeletedStages
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageList'
+
+  /api/v1/stages/{id}/restore:
+    parameters:
+      - $ref: '#/components/parameters/IdParam'
+    post:
+      tags:
+        - Stages
+      summary: Restore deleted Stage
+      operationId: restoreStage
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/stages/empty:
+    delete:
+      tags:
+        - Stages
+      summary: Empty trash for Stages
+      operationId: emptyTrashStages
+      responses:
+        '200':
+          description: Trash emptied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted_count:
+                    type: integer
+
+  /api/v1/stages/delete/bulk:
+    post:
+      tags:
+        - Stages
+      summary: Bulk soft-delete Stages by ids (atomic)
+      operationId: bulkDeleteStages
+      requestBody:
+        $ref: '#/components/requestBodies/BatchIds'
+      responses:
+        '200':
+          description: Soft-deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  soft_deleted: { type: integer }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/stages/restore/bulk:
+    post:
+      tags:
+        - Stages
+      summary: Bulk restore Stages by ids (atomic)
+      operationId: bulkRestoreStages
+      requestBody:
+        $ref: '#/components/requestBodies/BatchIds'
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageBulkResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/stages/restore/all:
+    post:
+      tags:
+        - Stages
+      summary: Restore all soft-deleted Stages
+      operationId: restoreAllStages
+      responses:
+        '200':
+          description: Restored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restored: { type: integer }
+
+  /api/v1/stages/trash/bulk:
+    delete:
+      tags:
+        - Stages
+      summary: Bulk permanently-delete Stages from trash by ids (atomic)
+      operationId: bulkPermanentDeleteStages
+      requestBody:
+        $ref: '#/components/requestBodies/BatchIds'
+      responses:
+        '200':
+          description: Permanently deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permanently_deleted: { type: integer }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
 components:
   schemas:
     Campaign:
@@ -1271,11 +1639,12 @@ components:
         - id
         - company_id
         - opportunity_name
+        - stage_id
         - currency
         - expected_amount
-        - sales_stage
         - probability
         - status
+        - active
         - metadata
       properties:
         id:
@@ -1299,11 +1668,20 @@ components:
           nullable: true
           type: string
           format: uuid
+        stage_id:
+          type: string
+          format: uuid
+        owner_user_id:
+          nullable: true
+          type: string
+          format: uuid
+        sales_team_id:
+          nullable: true
+          type: string
+          format: uuid
         currency:
           type: string
         expected_amount:
-          type: string
-        sales_stage:
           type: string
         probability:
           type: string
@@ -1325,6 +1703,16 @@ components:
           nullable: true
           type: string
           maxLength: 140
+        active:
+          type: boolean
+        date_last_stage_update:
+          nullable: true
+          type: string
+          format: date-time
+        date_closed:
+          nullable: true
+          type: string
+          format: date-time
         metadata:
           type: object
 
@@ -1346,11 +1734,12 @@ components:
       required:
         - company_id
         - opportunity_name
+        - stage_id
         - currency
         - expected_amount
-        - sales_stage
         - probability
         - status
+        - active
         - metadata
       properties:
         company_id:
@@ -1371,11 +1760,20 @@ components:
           nullable: true
           type: string
           format: uuid
+        stage_id:
+          type: string
+          format: uuid
+        owner_user_id:
+          nullable: true
+          type: string
+          format: uuid
+        sales_team_id:
+          nullable: true
+          type: string
+          format: uuid
         currency:
           type: string
         expected_amount:
-          type: string
-        sales_stage:
           type: string
         probability:
           type: string
@@ -1397,6 +1795,16 @@ components:
           nullable: true
           type: string
           maxLength: 140
+        active:
+          type: boolean
+        date_last_stage_update:
+          nullable: true
+          type: string
+          format: date-time
+        date_closed:
+          nullable: true
+          type: string
+          format: date-time
         metadata:
           type: object
 
@@ -1405,11 +1813,12 @@ components:
       required:
         - company_id
         - opportunity_name
+        - stage_id
         - currency
         - expected_amount
-        - sales_stage
         - probability
         - status
+        - active
         - metadata
       properties:
         company_id:
@@ -1430,11 +1839,20 @@ components:
           nullable: true
           type: string
           format: uuid
+        stage_id:
+          type: string
+          format: uuid
+        owner_user_id:
+          nullable: true
+          type: string
+          format: uuid
+        sales_team_id:
+          nullable: true
+          type: string
+          format: uuid
         currency:
           type: string
         expected_amount:
-          type: string
-        sales_stage:
           type: string
         probability:
           type: string
@@ -1456,6 +1874,16 @@ components:
           nullable: true
           type: string
           maxLength: 140
+        active:
+          type: boolean
+        date_last_stage_update:
+          nullable: true
+          type: string
+          format: date-time
+        date_closed:
+          nullable: true
+          type: string
+          format: date-time
         metadata:
           type: object
 
@@ -1480,11 +1908,20 @@ components:
           nullable: true
           type: string
           format: uuid
+        stage_id:
+          type: string
+          format: uuid
+        owner_user_id:
+          nullable: true
+          type: string
+          format: uuid
+        sales_team_id:
+          nullable: true
+          type: string
+          format: uuid
         currency:
           type: string
         expected_amount:
-          type: string
-        sales_stage:
           type: string
         probability:
           type: string
@@ -1506,6 +1943,16 @@ components:
           nullable: true
           type: string
           maxLength: 140
+        active:
+          type: boolean
+        date_last_stage_update:
+          nullable: true
+          type: string
+          format: date-time
+        date_closed:
+          nullable: true
+          type: string
+          format: date-time
         metadata:
           type: object
 
@@ -1667,6 +2114,156 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OpportunityItem'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Stage:
+      type: object
+      required:
+        - id
+        - company_id
+        - code
+        - name
+        - sequence
+        - is_won
+        - probability_hint
+        - active
+        - metadata
+      properties:
+        id:
+          type: string
+          format: uuid
+        company_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          maxLength: 40
+        name:
+          type: string
+          maxLength: 120
+        sequence:
+          type: integer
+          format: int32
+        is_won:
+          type: boolean
+        probability_hint:
+          type: string
+        active:
+          type: boolean
+        metadata:
+          type: object
+
+    StageBulkResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stage'
+        total: { type: integer }
+        failed: { type: integer }
+        errors:
+          type: array
+          items: { type: string }
+
+    CreateStageRequest:
+      type: object
+      required:
+        - company_id
+        - code
+        - name
+        - sequence
+        - is_won
+        - probability_hint
+        - active
+        - metadata
+      properties:
+        company_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          maxLength: 40
+        name:
+          type: string
+          maxLength: 120
+        sequence:
+          type: integer
+          format: int32
+        is_won:
+          type: boolean
+        probability_hint:
+          type: string
+        active:
+          type: boolean
+        metadata:
+          type: object
+
+    UpdateStageRequest:
+      type: object
+      required:
+        - company_id
+        - code
+        - name
+        - sequence
+        - is_won
+        - probability_hint
+        - active
+        - metadata
+      properties:
+        company_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          maxLength: 40
+        name:
+          type: string
+          maxLength: 120
+        sequence:
+          type: integer
+          format: int32
+        is_won:
+          type: boolean
+        probability_hint:
+          type: string
+        active:
+          type: boolean
+        metadata:
+          type: object
+
+    PatchStageRequest:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          maxLength: 40
+        name:
+          type: string
+          maxLength: 120
+        sequence:
+          type: integer
+          format: int32
+        is_won:
+          type: boolean
+        probability_hint:
+          type: string
+        active:
+          type: boolean
+        metadata:
+          type: object
+
+    StageList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stage'
         meta:
           $ref: '#/components/schemas/PaginationMeta'
 

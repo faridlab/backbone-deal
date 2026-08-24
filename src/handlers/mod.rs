@@ -12,6 +12,7 @@ use std::sync::Arc;
 use crate::application::service::CampaignService;
 use crate::application::service::OpportunityService;
 use crate::application::service::OpportunityItemService;
+use crate::application::service::StageService;
 
 /// Application state for dependency injection.
 ///
@@ -37,6 +38,8 @@ pub struct AppState {
     pub opportunity_service: Arc<OpportunityService>,
     /// OpportunityItem service
     pub opportunity_item_service: Arc<OpportunityItemService>,
+    /// Stage service
+    pub stage_service: Arc<StageService>,
 }
 
 impl AppState {
@@ -44,12 +47,14 @@ impl AppState {
     pub fn new(
         campaign_service: Arc<CampaignService>,
         opportunity_service: Arc<OpportunityService>,
-        opportunity_item_service: Arc<OpportunityItemService>
+        opportunity_item_service: Arc<OpportunityItemService>,
+        stage_service: Arc<StageService>
     ) -> Self {
         Self {
             campaign_service,
             opportunity_service,
             opportunity_item_service,
+            stage_service,
         }
     }
 
@@ -59,6 +64,7 @@ impl AppState {
             campaign_service: module.campaign_service.clone(),
             opportunity_service: module.opportunity_service.clone(),
             opportunity_item_service: module.opportunity_item_service.clone(),
+            stage_service: module.stage_service.clone(),
         }
     }
 }
@@ -71,6 +77,7 @@ pub struct AppStateBuilder {
     campaign_service: Option<Arc<CampaignService>>,
     opportunity_service: Option<Arc<OpportunityService>>,
     opportunity_item_service: Option<Arc<OpportunityItemService>>,
+    stage_service: Option<Arc<StageService>>,
 }
 
 impl AppStateBuilder {
@@ -97,6 +104,12 @@ impl AppStateBuilder {
         self
     }
 
+    /// Set the Stage service.
+    pub fn with_stage_service(mut self, service: Arc<StageService>) -> Self {
+        self.stage_service = Some(service);
+        self
+    }
+
     /// Build the AppState.
     ///
     /// # Panics
@@ -107,6 +120,7 @@ impl AppStateBuilder {
             campaign_service: self.campaign_service.expect("campaign_service is required"),
             opportunity_service: self.opportunity_service.expect("opportunity_service is required"),
             opportunity_item_service: self.opportunity_item_service.expect("opportunity_item_service is required"),
+            stage_service: self.stage_service.expect("stage_service is required"),
         }
     }
 }

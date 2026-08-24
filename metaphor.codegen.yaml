@@ -20,16 +20,20 @@ user_owned:
   - "src/application/workflows/mod.rs"
 
   # Hand-authored deal write-path: the SellingPort seam, the outcome events + sink, the win/lose/stage
-  # service, and the user-owned Opportunity/OpportunityItem repositories. Ported from backbone-crm.
+  # service, the user-owned Opportunity/OpportunityItem repositories, and the guarded route
+  # composition (reads + stage config writes + lifecycle verbs; no generic opportunity writes).
+  # Ported from backbone-crm.
   - "src/application/service/deal_ports.rs"
   - "src/application/service/deal_write_service.rs"
   - "src/domain/event/deal_outcome_events.rs"
   - "src/infrastructure/persistence/opportunity_repository.rs"
   - "src/infrastructure/persistence/opportunity_item_repository.rs"
+  - "src/presentation/http/guarded_routes.rs"
 
   # Behavior tests (the golden cases / oracle) + BDD features.
   - "tests/features/**"
-  # - "tests/*_golden_cases.rs"
+  - "tests/opportunity_stage_goldens.rs"
+  - "tests/stage_migration_goldens.rs"
   # - "tests/integrity_probes.rs"
 
   # Hand-authored module documentation.

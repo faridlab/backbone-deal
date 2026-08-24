@@ -35,6 +35,7 @@ pub use infrastructure::persistence::*;
 pub use application::service::CampaignService;
 pub use application::service::OpportunityService;
 pub use application::service::OpportunityItemService;
+pub use application::service::StageService;
 
 use std::sync::Arc;
 use axum::Router;
@@ -56,6 +57,7 @@ pub struct DealModule {
     pub(crate) campaign_service: Arc<CampaignService>,
     pub(crate) opportunity_service: Arc<OpportunityService>,
     pub(crate) opportunity_item_service: Arc<OpportunityItemService>,
+    pub(crate) stage_service: Arc<StageService>,
     // <<< CUSTOM FIELDS
     // END CUSTOM
 }
@@ -76,12 +78,14 @@ impl DealModule {
             create_campaign_routes,
             create_opportunity_routes,
             create_opportunity_item_routes,
+            create_stage_routes,
         };
 
         Router::new()
             .merge(create_campaign_routes(self.campaign_service.clone()))
             .merge(create_opportunity_routes(self.opportunity_service.clone()))
             .merge(create_opportunity_item_routes(self.opportunity_item_service.clone()))
+            .merge(create_stage_routes(self.stage_service.clone()))
     }
 
     /// Deprecated alias for [`Self::all_crud_routes`]. `routes()` reads like
@@ -104,12 +108,14 @@ impl DealModule {
             create_campaign_read_routes,
             create_opportunity_read_routes,
             create_opportunity_item_read_routes,
+            create_stage_read_routes,
         };
 
         Router::new()
             .merge(create_campaign_read_routes(self.campaign_service.clone()))
             .merge(create_opportunity_read_routes(self.opportunity_service.clone()))
             .merge(create_opportunity_item_read_routes(self.opportunity_item_service.clone()))
+            .merge(create_stage_read_routes(self.stage_service.clone()))
     }
 
     // <<< CUSTOM METHODS
@@ -155,6 +161,10 @@ impl DealModuleBuilder {
         let opportunity_item_repository = Arc::new(OpportunityItemRepository::new(db_pool.clone()));
         let opportunity_item_service = Arc::new(OpportunityItemService::with_repository(opportunity_item_repository.clone()));
 
+        // Stage service
+        let stage_repository = Arc::new(StageRepository::new(db_pool.clone()));
+        let stage_service = Arc::new(StageService::with_repository(stage_repository.clone()));
+
         // <<< CUSTOM
         // END CUSTOM
 
@@ -162,6 +172,7 @@ impl DealModuleBuilder {
             campaign_service,
             opportunity_service,
             opportunity_item_service,
+            stage_service,
             // <<< CUSTOM
             // END CUSTOM
         })

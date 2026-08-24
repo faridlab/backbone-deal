@@ -9,6 +9,7 @@
 pub mod campaign_repository;
 pub mod opportunity_repository;
 pub mod opportunity_item_repository;
+pub mod stage_repository;
 
 // Re-exports
 pub use campaign_repository::{
@@ -28,4 +29,10 @@ pub use opportunity_item_repository::{
     OpportunityItemPaginationParams,
     OpportunityItemPaginatedResult,
     OpportunityItemFilter,
+};
+pub use stage_repository::{
+    StageRepository,
+    StagePaginationParams,
+    StagePaginatedResult,
+    StageFilter,
 };

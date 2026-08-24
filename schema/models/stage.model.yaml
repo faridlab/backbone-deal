@@ -1,0 +1,71 @@
+# =============================================================================
+# Module: backbone-deal
+# Entity: Stage
+# Description: A company-configurable sales-pipeline stage. The pipeline itself
+#              is company config (name + order + machine code); the flags carry
+#              the semantics other code keys on — entering an is_won stage
+#              forces probability 100 and derives status=won; probability_hint
+#              is advisory display data and is NEVER auto-applied on a move.
+#              The default stage set is seeded per company (migration +
+#              lazy ensure at first opportunity), and re-seeding converges on
+#              deterministic uuid5(company_id, code) ids.
+# =============================================================================
+
+models:
+  - name: Stage
+    collection: stages
+    description: "A company-configurable sales-pipeline stage (order + semantic flags). Entering an is_won stage forces probability 100 and derives status=won; the default set is seeded per company and re-seeding converges on deterministic uuid5 ids."
+
+    fields:
+      id:
+        type: uuid
+        attributes: ["@id", "@default(uuid)"]
+        description: "Unique stage id"
+
+      company_id:
+        type: uuid
+        attributes: ["@required", "@exclude_from_foreign_key_check"]
+        description: "Owning company # logical FK organization.Company.id"
+
+      code:
+        type: string
+        attributes: ["@required", "@max(40)"]
+        description: "Machine key the seeding and win logic key on; immune to display renames"
+
+      name:
+        type: string
+        attributes: ["@required", "@max(120)"]
+        description: "Stage name shown to sellers"
+
+      sequence:
+        type: int
+        attributes: ["@required", "@non_negative", "@default(10)"]
+        description: "Sort order; the win verb picks the lowest-sequence is_won stage"
+
+      is_won:
+        type: boolean
+        attributes: ["@required", "@default(false)"]
+        description: "Entering this stage forces probability=100 and derives status=won (cross-table rule, enforced in the write service — not CHECK-expressible)"
+
+      probability_hint:
+        type: decimal
+        attributes: ["@default(0)", "@precision(5,2)", "@non_negative"]
+        description: "Advisory entry probability for UI display; NEVER auto-applied on a stage move — a caller wanting it sends it as the move's probability explicitly"
+
+      active:
+        type: boolean
+        attributes: ["@required", "@default(true)"]
+        description: "Inactive stages are unselectable as move targets, not deleted"
+
+      metadata:
+        type: Metadata
+        attributes: ["@audit_metadata"]
+        description: "Audit metadata"
+
+    indexes:
+      - type: unique
+        fields: [company_id, code]
+      - type: unique
+        fields: [company_id, name]
+      - type: index
+        fields: [company_id, sequence]

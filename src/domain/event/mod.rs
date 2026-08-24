@@ -8,6 +8,8 @@ pub mod opportunity_events;
 pub mod opportunity_event_handlers;
 pub mod opportunity_item_events;
 pub mod opportunity_item_event_handlers;
+pub mod stage_events;
+pub mod stage_event_handlers;
 
 pub use campaign_events::{CampaignEvent, CampaignEventPublisher, NoopCampaignEventPublisher};
 pub use campaign_event_handlers::CampaignEventHandler;
@@ -15,6 +17,8 @@ pub use opportunity_events::{OpportunityEvent, OpportunityEventPublisher, NoopOp
 pub use opportunity_event_handlers::OpportunityEventHandler;
 pub use opportunity_item_events::{OpportunityItemEvent, OpportunityItemEventPublisher, NoopOpportunityItemEventPublisher};
 pub use opportunity_item_event_handlers::OpportunityItemEventHandler;
+pub use stage_events::{StageEvent, StageEventPublisher, NoopStageEventPublisher};
+pub use stage_event_handlers::StageEventHandler;
 
 // <<< CUSTOM
 pub mod deal_outcome_events;

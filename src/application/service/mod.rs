@@ -10,6 +10,7 @@ pub use error::{ServiceError, ServiceResult};
 pub mod campaign_service;
 pub mod opportunity_service;
 pub mod opportunity_item_service;
+pub mod stage_service;
 
 // <<< CUSTOM
 pub mod deal_ports;
@@ -19,6 +20,7 @@ pub mod deal_write_service;
 pub use campaign_service::CampaignService;
 pub use opportunity_service::OpportunityService;
 pub use opportunity_item_service::OpportunityItemService;
+pub use stage_service::StageService;
 // <<< CUSTOM
 pub use deal_ports::{SellingPort, QuotationFromOpp, OppLine, QuotationAck, CrmRejected};
 pub use deal_write_service::{DealWriteService, WinOutcome, DealError};
