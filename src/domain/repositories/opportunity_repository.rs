@@ -44,7 +44,6 @@ pub struct OpportunityPaginatedResult {
 /// Filter parameters for list queries
 #[derive(Debug, Clone, Default)]
 pub struct OpportunityFilter {
-    pub company_id: Option<Uuid>,
     pub opportunity_name: Option<String>,
     pub lead_id: Option<Uuid>,
     pub party_id: Option<Uuid>,
@@ -63,7 +62,7 @@ pub struct OpportunityFilter {
 impl OpportunityFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.company_id.is_some() || self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.stage_id.is_some() || self.owner_user_id.is_some() || self.sales_team_id.is_some() || self.currency.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some() || self.active.is_some()
+        self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.stage_id.is_some() || self.owner_user_id.is_some() || self.sales_team_id.is_some() || self.currency.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some() || self.active.is_some()
     }
 }
 

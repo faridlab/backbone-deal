@@ -11,6 +11,8 @@
 # =============================================================================
 
 models:
+  # Tenancy: none, by design (ADR-0029). Tenant-agnostic and reusable; a composing
+  # service's tenancy decorator owns org scoping for both tables below.
   - name: Opportunity
     collection: opportunities
     description: "A qualified deal with stage/value/probability; hands off to selling when won"
@@ -22,10 +24,6 @@ models:
         type: uuid
         attributes: ["@id", "@default(uuid)"]
         description: "Unique opportunity id"
-      company_id:
-        type: uuid
-        attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Org owner # logical FK to organization.Company.id"
       opportunity_name:
         type: string
         attributes: ["@required", "@max(140)"]
@@ -103,8 +101,6 @@ models:
         description: "Audit metadata"
     indexes:
       - type: index
-        fields: [company_id, status, stage_id]
-      - type: index
         fields: [owner_user_id]
       - type: index
         fields: [lead_id]
@@ -125,10 +121,6 @@ models:
         type: uuid
         attributes: ["@required", "@foreign_key(Opportunity.id)"]
         description: "Parent opportunity (INTRA-module real FK)"
-      company_id:
-        type: uuid
-        attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Org owner # logical FK to organization.Company.id (ADR-0010 fence)"
       item_id:
         type: uuid
         attributes: ["@required", "@exclude_from_foreign_key_check"]

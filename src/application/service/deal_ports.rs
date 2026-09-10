@@ -19,6 +19,10 @@ pub struct OppLine {
 }
 
 /// Hand a won opportunity off to selling as a Quotation/Sales Order.
+///
+/// `company_id` is the legacy tenancy twin (ADR-0029): deal itself is tenant-agnostic, but the
+/// receiving selling books still key on one. The write service sources it from the ambient org
+/// scope's legacy company id and fails closed when no scope is bound — it never guesses.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct QuotationFromOpp {
     pub company_id: Uuid,

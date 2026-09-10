@@ -33,9 +33,6 @@ use crate::domain::entity::AuditMetadata;
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateStageDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub code: String,
@@ -66,9 +63,6 @@ pub struct CreateStageDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateStageDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub code: String,
@@ -99,9 +93,6 @@ pub struct UpdateStageDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct PatchStageDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 40)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -126,7 +117,7 @@ pub struct PatchStageDto {
 impl PatchStageDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.company_id.is_some() || self.code.is_some() || self.name.is_some() || self.sequence.is_some() || self.is_won.is_some() || self.probability_hint.is_some() || self.active.is_some()
+        self.code.is_some() || self.name.is_some() || self.sequence.is_some() || self.is_won.is_some() || self.probability_hint.is_some() || self.active.is_some()
     }
 }
 
@@ -144,8 +135,6 @@ impl PatchStageDto {
 pub struct StageResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub code: String,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
@@ -214,9 +203,9 @@ impl StageListResponseDto {
 #[serde(rename_all = "camelCase")]
 pub struct StageSummaryDto {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub code: String,
     pub name: String,
+    pub sequence: i32,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -228,7 +217,6 @@ impl From<Stage> for StageResponseDto {
     fn from(entity: Stage) -> Self {
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             code: entity.code,
             name: entity.name,
             sequence: entity.sequence,
@@ -245,9 +233,9 @@ impl From<Stage> for StageSummaryDto {
         let created_at = backbone_core::PersistentEntity::created_at(&entity);
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             code: entity.code,
             name: entity.name,
+            sequence: entity.sequence,
             created_at,
         }
     }
@@ -257,7 +245,6 @@ impl From<CreateStageDto> for Stage {
     fn from(dto: CreateStageDto) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id: dto.company_id,
             code: dto.code,
             name: dto.name,
             sequence: dto.sequence,
@@ -273,7 +260,6 @@ impl From<&Stage> for StageResponseDto {
     fn from(entity: &Stage) -> Self {
         Self {
             id: entity.id.clone(),
-            company_id: entity.company_id.clone(),
             code: entity.code.clone(),
             name: entity.name.clone(),
             sequence: entity.sequence.clone(),
@@ -293,7 +279,6 @@ impl backbone_core::FromCreateDto<CreateStageDto> for Stage {
 
 impl backbone_core::ApplyUpdateDto<UpdateStageDto> for Stage {
     fn apply_update(mut self, dto: UpdateStageDto) -> backbone_core::ServiceResult<Self> {
-        self.company_id = dto.company_id;
         self.code = dto.code;
         self.name = dto.name;
         self.sequence = dto.sequence;
@@ -312,4 +297,3 @@ impl backbone_core::ApplyUpdateDto<UpdateStageDto> for Stage {
 // Add custom DTOs specific to Stage here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
-

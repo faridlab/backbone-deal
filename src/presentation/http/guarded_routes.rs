@@ -4,8 +4,16 @@
 //! the generic create/update/delete CRUD is NOT mounted for them, so a caller cannot hand-set the
 //! derived `status`, clobber a manual probability, or write a `quotation_id` — the computed
 //! lifecycle fields move only through the gated stage/win/lose statements. Stages, by contrast,
-//! are company config masters with no cross-entity invariants, so their generic (tenant-fenced)
+//! are tenant config masters with no cross-entity invariants, so their generic (scope-fenced)
 //! writes ARE mounted — the recruitment module's posture for its stage config.
+//!
+//! Tenancy (ADR-0029): the module carries no tenancy of its own. `org_auth` verifies the Bearer
+//! token, resolves the session's org scope against the request's tenant tree, and runs every
+//! handler inside that scope — the module's statements ride the request-dedicated connection it
+//! binds, and the composing service's tenancy decorator does the actual row-level fencing. The
+//! guard reads the tenant database from the `backbone_orm::PgPool` request extension, so this
+//! surface must be mounted inside the composing service's tenant router (the same wiring every
+//! org-guarded module requires).
 //!
 //! The win verb needs the selling handoff (`SellingPort`) and the outcome events (`DealEventSink`);
 //! a composing service supplies both (the adapters live in the composing app, not here).
@@ -23,7 +31,7 @@ use axum::{
     routing::post,
     Json, Router,
 };
-use backbone_auth::company::{company_auth, CompanyVerifier};
+use backbone_auth::org::{org_auth, OrgVerifier};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -89,9 +97,9 @@ struct LoseBody {
 
 // ── handlers ─────────────────────────────────────────────────────────────────
 
-// All three verbs are ID-only: the tenant is the one `company_auth` bound for the request
-// (the middleware sets the company scope the gated statements ride), never a body field —
-// a client must not be able to name the tenant it writes into.
+// All three verbs are ID-only: the scope is the one `org_auth` resolved and bound for the
+// request (the gated statements ride the request-dedicated connection it holds), never a
+// body field — a client must not be able to name the tenant it writes into.
 
 async fn move_stage(
     State(deps): State<Arc<VerbDeps>>,
@@ -151,41 +159,44 @@ fn create_deal_verb_routes(
     service: Arc<DealWriteService>,
     selling: Arc<dyn SellingPort>,
     sink: Arc<dyn DealEventSink>,
-    verifier: CompanyVerifier,
+    verifier: OrgVerifier,
 ) -> Router {
     let deps = Arc::new(VerbDeps { service, selling, sink });
     Router::new()
         .route("/opportunities/:id/stage", post(move_stage))
         .route("/opportunities/:id/win", post(win))
         .route("/opportunities/:id/lose", post(lose))
-        // Every write above is tenant-scoped: `company_auth` rejects a request whose token is absent,
-        // invalid, or carries no `company_id`, so a handler only ever runs with a proven tenant.
+        // Every write above is scope-bound: `org_auth` rejects a request whose token is absent,
+        // invalid, or names a unit outside this tenant's tree, and runs the handler inside the
+        // resolved org scope — a handler only ever executes with a proven, fenced session.
         //
         // `route_layer`, not `layer`: `layer` would also wrap this router's fallback, so once merged
         // every *unmatched* path (e.g. the generic CRUD paths this surface deliberately does not
         // mount) would answer 401 instead of 404 — leaking "auth required" for routes that do not
         // exist, and masking the CRUD-bypass probes.
-        .route_layer(from_fn_with_state(verifier, company_auth))
+        .route_layer(from_fn_with_state(verifier, org_auth))
         .with_state(deps)
 }
 
-/// Mount the deal module: read all documents + stage config writes + tenant-scoped lifecycle
+/// Mount the deal module: read all documents + stage config writes + scope-fenced lifecycle
 /// verbs. Generic opportunity mutation is not mounted. **Prefer this over
 /// `DealModule::all_crud_routes()` for any real deployment.**
 ///
-/// The composing service builds one [`CompanyVerifier`] from its JWT secret and passes it here;
-/// the write surface derives its tenant from the token, so no tenant crosses the wire in a body.
+/// The composing service builds one [`OrgVerifier`] from its JWT secret and passes it here;
+/// the surface derives its session from the token, so no tenant crosses the wire in a body.
+/// Mount inside the tenant router with the `backbone_orm::PgPool` request extension attached —
+/// `org_auth` resolves the scope against that pool.
 pub fn create_guarded_deal_routes(
     m: &DealModule,
     pool: PgPool,
-    verifier: CompanyVerifier,
+    verifier: OrgVerifier,
     selling: Arc<dyn SellingPort>,
     sink: Arc<dyn DealEventSink>,
 ) -> Router {
     let write = Arc::new(DealWriteService::new(pool));
     Router::new()
         .merge(m.readonly_routes())
-        // Stages are company config masters: generic (tenant-fenced) writes, the recruitment
+        // Stages are tenant config masters: generic (scope-fenced) writes, the recruitment
         // posture for its stage config. Opportunities keep NO generic writes — their lifecycle
         // fields are computed and move only through the verbs below.
         .merge(create_stage_write_routes(m.stage_service.clone()))

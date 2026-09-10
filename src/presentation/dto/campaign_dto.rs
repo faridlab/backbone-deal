@@ -33,9 +33,6 @@ use crate::domain::entity::CampaignStatus;
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateCampaignDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "campaign_name")]
@@ -65,9 +62,6 @@ pub struct CreateCampaignDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateCampaignDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "campaign_name")]
@@ -97,9 +91,6 @@ pub struct UpdateCampaignDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct PatchCampaignDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "campaign_name")]
@@ -120,7 +111,7 @@ pub struct PatchCampaignDto {
 impl PatchCampaignDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.company_id.is_some() || self.campaign_name.is_some() || self.utm_source.is_some() || self.utm_medium.is_some() || self.utm_campaign.is_some() || self.status.is_some()
+        self.campaign_name.is_some() || self.utm_source.is_some() || self.utm_medium.is_some() || self.utm_campaign.is_some() || self.status.is_some()
     }
 }
 
@@ -138,8 +129,6 @@ impl PatchCampaignDto {
 pub struct CampaignResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub campaign_name: String,
     pub utm_source: Option<String>,
@@ -203,9 +192,9 @@ impl CampaignListResponseDto {
 #[serde(rename_all = "camelCase")]
 pub struct CampaignSummaryDto {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub campaign_name: String,
     pub utm_source: Option<String>,
+    pub utm_medium: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -217,7 +206,6 @@ impl From<Campaign> for CampaignResponseDto {
     fn from(entity: Campaign) -> Self {
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             campaign_name: entity.campaign_name,
             utm_source: entity.utm_source,
             utm_medium: entity.utm_medium,
@@ -233,9 +221,9 @@ impl From<Campaign> for CampaignSummaryDto {
         let created_at = backbone_core::PersistentEntity::created_at(&entity);
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             campaign_name: entity.campaign_name,
             utm_source: entity.utm_source,
+            utm_medium: entity.utm_medium,
             created_at,
         }
     }
@@ -245,7 +233,6 @@ impl From<CreateCampaignDto> for Campaign {
     fn from(dto: CreateCampaignDto) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id: dto.company_id,
             campaign_name: dto.campaign_name,
             utm_source: dto.utm_source,
             utm_medium: dto.utm_medium,
@@ -260,7 +247,6 @@ impl From<&Campaign> for CampaignResponseDto {
     fn from(entity: &Campaign) -> Self {
         Self {
             id: entity.id.clone(),
-            company_id: entity.company_id.clone(),
             campaign_name: entity.campaign_name.clone(),
             utm_source: entity.utm_source.clone(),
             utm_medium: entity.utm_medium.clone(),
@@ -279,7 +265,6 @@ impl backbone_core::FromCreateDto<CreateCampaignDto> for Campaign {
 
 impl backbone_core::ApplyUpdateDto<UpdateCampaignDto> for Campaign {
     fn apply_update(mut self, dto: UpdateCampaignDto) -> backbone_core::ServiceResult<Self> {
-        self.company_id = dto.company_id;
         self.campaign_name = dto.campaign_name;
         self.utm_source = dto.utm_source;
         self.utm_medium = dto.utm_medium;

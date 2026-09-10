@@ -4,6 +4,10 @@
 //! signals the write path publishes. `OpportunityWon` (the deal handed off to selling, which created
 //! the Quotation/SO) and `OpportunityLost` (a read-side win/loss signal). Ported from backbone-crm's
 //! `crm_events.rs` (OpportunityWon/Lost) + its `CrmEventSink` (now `DealEventSink`).
+//!
+//! Tenancy (ADR-0029): the module is tenant-agnostic, but the funnel consumers still key on a
+//! company, so the payloads carry the legacy company twin — sourced by the write service from the
+//! ambient org scope, fail-closed when no scope is bound.
 
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -15,6 +19,8 @@ pub struct OpportunityWon {
     pub opportunity_id: Uuid,
     pub party_id: Uuid,
     pub quotation_id: Uuid,
+    /// Legacy company twin for the funnel consumers; sourced from the ambient org scope,
+    /// fail-closed (ADR-0029).
     pub company_id: Uuid,
     pub amount: Decimal,
     /// The campaign the winning deal is attributed to (snapshotted from the lead at qualify).
@@ -26,6 +32,8 @@ pub struct OpportunityWon {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct OpportunityLost {
     pub opportunity_id: Uuid,
+    /// Legacy company twin for the funnel consumers; sourced from the ambient org scope,
+    /// fail-closed (ADR-0029).
     pub company_id: Uuid,
     pub lost_reason: Option<String>,
     pub competitor: Option<String>,

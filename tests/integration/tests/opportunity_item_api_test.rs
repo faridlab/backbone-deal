@@ -25,7 +25,6 @@ impl TestDataGenerator for OpportunityItemTestData {
         json!({
             "id": Uuid::new_v4().to_string(),
             "opportunity_id": Uuid::new_v4().to_string(),
-            "company_id": Uuid::new_v4().to_string(),
             "item_id": Uuid::new_v4().to_string(),
             "description": null,
             "quantity": 0,
@@ -40,7 +39,6 @@ impl TestDataGenerator for OpportunityItemTestData {
         json!({
             "id": id,
             "opportunity_id": Uuid::new_v4().to_string(),
-            "company_id": Uuid::new_v4().to_string(),
             "item_id": Uuid::new_v4().to_string(),
             "description": null,
             "quantity": 0,

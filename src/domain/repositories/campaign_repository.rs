@@ -7,7 +7,6 @@
 
 use async_trait::async_trait;
 use anyhow::Result;
-use uuid::Uuid;
 
 use crate::domain::entity::{Campaign, CampaignStatus};
 
@@ -44,7 +43,6 @@ pub struct CampaignPaginatedResult {
 /// Filter parameters for list queries
 #[derive(Debug, Clone, Default)]
 pub struct CampaignFilter {
-    pub company_id: Option<Uuid>,
     pub campaign_name: Option<String>,
     pub utm_source: Option<String>,
     pub utm_medium: Option<String>,
@@ -55,7 +53,7 @@ pub struct CampaignFilter {
 impl CampaignFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.company_id.is_some() || self.campaign_name.is_some() || self.utm_source.is_some() || self.utm_medium.is_some() || self.utm_campaign.is_some() || self.status.is_some()
+        self.campaign_name.is_some() || self.utm_source.is_some() || self.utm_medium.is_some() || self.utm_campaign.is_some() || self.status.is_some()
     }
 }
 

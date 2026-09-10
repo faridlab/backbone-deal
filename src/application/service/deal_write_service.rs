@@ -12,7 +12,7 @@
 //! in one transaction — lives in backbone-crm-app. Ported from backbone-crm's `crm_write_service.rs`
 //! (deal parts).
 
-use backbone_orm::company_scope;
+use backbone_orm::org_scope;
 use rust_decimal::Decimal;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -38,6 +38,8 @@ pub enum DealError {
     Invalid(String),
     #[error("selling rejected: {0}")]
     SellingRejected(String),
+    #[error("no org scope bound: the composing service must resolve one for this request")]
+    NoCompanyScope,
 }
 
 impl DealError {
@@ -51,11 +53,13 @@ impl DealError {
             DealError::StageInactive(_) => "stage_inactive".into(),
             DealError::Invalid(_) => "invalid_input".into(),
             DealError::SellingRejected(_) => "selling_rejected".into(),
+            DealError::NoCompanyScope => "no_org_scope".into(),
         }
     }
     pub fn http_status(&self) -> u16 {
         match self {
             DealError::Db(_) => 500,
+            DealError::NoCompanyScope => 500,
             DealError::NotFound(_) | DealError::StageNotFound(_) => 404,
             _ => 422,
         }
@@ -91,6 +95,15 @@ impl DealWriteService {
         Self { pool, opportunities, opportunity_items }
     }
 
+    /// The company id for the seams that still key on one — the selling handoff
+    /// (`QuotationFromOpp`) and the outcome events. Sourced from the ambient org scope the
+    /// COMPOSING service binds; absent → fail-closed. The module never guesses a company.
+    fn legacy_company_id() -> Result<Uuid, DealError> {
+        org_scope::current_org_scope()
+            .and_then(|s| s.legacy_company_id())
+            .ok_or(DealError::NoCompanyScope)
+    }
+
     /// Move an opportunity's stage. Entering an `is_won` stage forces probability 100 and derives
     /// status=won; an explicit `probability` edit applies on any move (including a same-stage edit);
     /// a move with no probability value preserves the manual probability untouched.
@@ -106,9 +119,9 @@ impl DealWriteService {
             }
         }
         // Two-probe error split (the family convention): a missing/inactive TARGET stage is a
-        // named, actionable error; a target the caller's tenant cannot see reads as absent.
-        // RLS scope (ADR-0008), ID-only pattern: no company argument — both probes ride the
-        // request-dedicated connection, so RLS fences them to the caller's tenant.
+        // named, actionable error; a target the caller's scope cannot see reads as absent.
+        // ID-only pattern (ADR-0029): no tenant argument — both probes ride the request-dedicated
+        // connection when the composing service bound one, so its row-level fence decides.
         let stage = self
             .opportunities
             .find_stage_for_move(&self.pool, to_stage_id)
@@ -139,8 +152,8 @@ impl DealWriteService {
         selling: &dyn SellingPort,
         sink: &dyn DealEventSink,
     ) -> Result<WinOutcome, DealError> {
-        // RLS scope (ADR-0008), ID-only pattern — the header read is fenced by the request-dedicated
-        // connection; the reads/writes below re-bind the opportunity's own company.
+        // ID-only read (ADR-0029) — the header read rides the request-dedicated connection when
+        // one is bound, so a row the composing decorator's fence excludes simply is not found.
         let opp = self
             .opportunities
             .find_for_win(&self.pool, opportunity_id)
@@ -159,23 +172,25 @@ impl DealWriteService {
         let party_id: Uuid = opp
             .party_id
             .ok_or(DealError::Invalid("opportunity has no party — convert the lead first".into()))?;
-        let company_id = opp.company_id;
         let campaign_id: Option<Uuid> = opp.campaign_id;
         let currency: String = opp.currency;
 
-        // The won stage this company lands on: its lowest-sequence active is_won stage.
-        let won_stage_id = company_scope::with_company_scope(
-            Some(company_id),
-            self.opportunities.pick_won_stage(&self.pool, company_id),
-        )
-        .await?
-        .ok_or(DealError::InvalidState("company has no active won stage"))?;
+        // The handoff + event seams still key on a company (selling's books, the funnel
+        // consumers): source the legacy twin off the ambient org scope, fail-closed.
+        let company_id = Self::legacy_company_id()?;
 
-        let line_rows: Vec<OppItemLineRow> = company_scope::with_company_scope(
-            Some(company_id),
-            self.opportunity_items.list_lines(&self.pool, opportunity_id),
-        )
-        .await?;
+        // The won stage this session lands on: the lowest-sequence active is_won stage visible
+        // in the caller's scope.
+        let won_stage_id = self
+            .opportunities
+            .pick_won_stage(&self.pool)
+            .await?
+            .ok_or(DealError::InvalidState("no active won stage is configured"))?;
+
+        let line_rows: Vec<OppItemLineRow> = self
+            .opportunity_items
+            .list_lines(&self.pool, opportunity_id)
+            .await?;
         let lines: Vec<OppLine> = line_rows
             .iter()
             .map(|r| OppLine { item_id: r.item_id, quantity: r.quantity, rate: r.rate })
@@ -191,17 +206,12 @@ impl DealWriteService {
             .map_err(|r| DealError::SellingRejected(r.code))?;
 
         // Gate: claim the win exactly once.
-        let moved = company_scope::with_company_scope(
-            Some(company_id),
-            self.opportunities.claim_win(&self.pool, opportunity_id, ack.quotation_id, won_stage_id),
-        )
-        .await?;
-        if moved != 1 {
-            let q: Uuid = company_scope::with_company_scope(
-                Some(company_id),
-                self.opportunities.fetch_quotation_id(&self.pool, opportunity_id),
-            )
+        let moved = self
+            .opportunities
+            .claim_win(&self.pool, opportunity_id, ack.quotation_id, won_stage_id)
             .await?;
+        if moved != 1 {
+            let q: Uuid = self.opportunities.fetch_quotation_id(&self.pool, opportunity_id).await?;
             return Ok(WinOutcome { quotation_id: q, amount, already: true });
         }
         sink.publish(&DealEvent::OpportunityWon(OpportunityWon {
@@ -224,23 +234,24 @@ impl DealWriteService {
         competitor: Option<String>,
         sink: &dyn DealEventSink,
     ) -> Result<(), DealError> {
-        // RLS scope (ADR-0008), ID-only pattern: the gated UPDATE..RETURNING rides the request-dedicated
-        // connection, so RLS fences it to the caller's tenant.
-        let company_id: Option<Uuid> = self
+        // ID-only (ADR-0029): the gated UPDATE rides the request-dedicated connection when one is
+        // bound, so the composing decorator's fence decides what is updatable.
+        let lost = self
             .opportunities
             .lose(&self.pool, opportunity_id, lost_reason.as_deref(), competitor.as_deref())
             .await?;
-        match company_id {
-            Some(cid) => {
-                sink.publish(&DealEvent::OpportunityLost(OpportunityLost {
-                    opportunity_id,
-                    company_id: cid,
-                    lost_reason,
-                    competitor,
-                }));
-                Ok(())
-            }
-            None => Err(DealError::InvalidState("opportunity is not open")),
+        if !lost {
+            return Err(DealError::InvalidState("opportunity is not open"));
         }
+        // The event seam still keys on a company (the funnel consumers): source the legacy twin
+        // off the ambient org scope, fail-closed.
+        let company_id = Self::legacy_company_id()?;
+        sink.publish(&DealEvent::OpportunityLost(OpportunityLost {
+            opportunity_id,
+            company_id,
+            lost_reason,
+            competitor,
+        }));
+        Ok(())
     }
 }

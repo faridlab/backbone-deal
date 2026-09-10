@@ -37,9 +37,6 @@ pub struct CreateOpportunityItemDto {
     #[serde(alias = "opportunity_id")]
     pub opportunity_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "item_id")]
     pub item_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 280)))]
@@ -66,9 +63,6 @@ pub struct UpdateOpportunityItemDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "opportunity_id")]
     pub opportunity_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(alias = "item_id")]
     pub item_id: Uuid,
@@ -97,9 +91,6 @@ pub struct PatchOpportunityItemDto {
     #[serde(skip_serializing_if = "Option::is_none", alias = "opportunity_id")]
     pub opportunity_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "item_id")]
     pub item_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 280)))]
@@ -116,7 +107,7 @@ pub struct PatchOpportunityItemDto {
 impl PatchOpportunityItemDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.opportunity_id.is_some() || self.company_id.is_some() || self.item_id.is_some() || self.description.is_some() || self.quantity.is_some() || self.rate.is_some() || self.amount.is_some()
+        self.opportunity_id.is_some() || self.item_id.is_some() || self.description.is_some() || self.quantity.is_some() || self.rate.is_some() || self.amount.is_some()
     }
 }
 
@@ -136,8 +127,6 @@ pub struct OpportunityItemResponseDto {
     pub id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub opportunity_id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub item_id: Uuid,
     pub description: Option<String>,
@@ -202,8 +191,8 @@ impl OpportunityItemListResponseDto {
 pub struct OpportunityItemSummaryDto {
     pub id: Uuid,
     pub opportunity_id: Uuid,
-    pub company_id: Uuid,
     pub item_id: Uuid,
+    pub description: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -216,7 +205,6 @@ impl From<OpportunityItem> for OpportunityItemResponseDto {
         Self {
             id: entity.id,
             opportunity_id: entity.opportunity_id,
-            company_id: entity.company_id,
             item_id: entity.item_id,
             description: entity.description,
             quantity: entity.quantity,
@@ -233,8 +221,8 @@ impl From<OpportunityItem> for OpportunityItemSummaryDto {
         Self {
             id: entity.id,
             opportunity_id: entity.opportunity_id,
-            company_id: entity.company_id,
             item_id: entity.item_id,
+            description: entity.description,
             created_at,
         }
     }
@@ -245,7 +233,6 @@ impl From<CreateOpportunityItemDto> for OpportunityItem {
         Self {
             id: Uuid::new_v4(),
             opportunity_id: dto.opportunity_id,
-            company_id: dto.company_id,
             item_id: dto.item_id,
             description: dto.description,
             quantity: dto.quantity,
@@ -261,7 +248,6 @@ impl From<&OpportunityItem> for OpportunityItemResponseDto {
         Self {
             id: entity.id.clone(),
             opportunity_id: entity.opportunity_id.clone(),
-            company_id: entity.company_id.clone(),
             item_id: entity.item_id.clone(),
             description: entity.description.clone(),
             quantity: entity.quantity.clone(),
@@ -281,7 +267,6 @@ impl backbone_core::FromCreateDto<CreateOpportunityItemDto> for OpportunityItem 
 impl backbone_core::ApplyUpdateDto<UpdateOpportunityItemDto> for OpportunityItem {
     fn apply_update(mut self, dto: UpdateOpportunityItemDto) -> backbone_core::ServiceResult<Self> {
         self.opportunity_id = dto.opportunity_id;
-        self.company_id = dto.company_id;
         self.item_id = dto.item_id;
         self.description = dto.description;
         self.quantity = dto.quantity;

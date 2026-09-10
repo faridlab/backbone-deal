@@ -1,31 +1,28 @@
 # =============================================================================
 # Module: backbone-deal
 # Entity: Stage
-# Description: A company-configurable sales-pipeline stage. The pipeline itself
-#              is company config (name + order + machine code); the flags carry
+# Description: A tenant-configurable sales-pipeline stage. The pipeline itself
+#              is tenant config (name + order + machine code); the flags carry
 #              the semantics other code keys on — entering an is_won stage
 #              forces probability 100 and derives status=won; probability_hint
 #              is advisory display data and is NEVER auto-applied on a move.
-#              The default stage set is seeded per company (migration +
-#              lazy ensure at first opportunity), and re-seeding converges on
-#              deterministic uuid5(company_id, code) ids.
+#              The default stage set is seeded lazily (at first opportunity),
+#              and re-seeding converges on the rows already present.
 # =============================================================================
 
 models:
+  # Tenancy: none, by design (ADR-0029). Tenant-agnostic and reusable; a composing
+  # service's tenancy decorator owns org scoping for this table, including the
+  # per-unit uniques on (code) and (name) that keep one pipeline per unit.
   - name: Stage
     collection: stages
-    description: "A company-configurable sales-pipeline stage (order + semantic flags). Entering an is_won stage forces probability 100 and derives status=won; the default set is seeded per company and re-seeding converges on deterministic uuid5 ids."
+    description: "A tenant-configurable sales-pipeline stage (order + semantic flags). Entering an is_won stage forces probability 100 and derives status=won; the default set is seeded lazily and re-seeding converges on the rows already present."
 
     fields:
       id:
         type: uuid
         attributes: ["@id", "@default(uuid)"]
         description: "Unique stage id"
-
-      company_id:
-        type: uuid
-        attributes: ["@required", "@exclude_from_foreign_key_check"]
-        description: "Owning company # logical FK organization.Company.id"
 
       code:
         type: string
@@ -61,11 +58,3 @@ models:
         type: Metadata
         attributes: ["@audit_metadata"]
         description: "Audit metadata"
-
-    indexes:
-      - type: unique
-        fields: [company_id, code]
-      - type: unique
-        fields: [company_id, name]
-      - type: index
-        fields: [company_id, sequence]

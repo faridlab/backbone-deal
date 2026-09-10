@@ -2,10 +2,13 @@
 //! chain, proven against real Postgres.
 //!
 //! Each golden builds its own throwaway database from the repo's `migrations/` directory (read at
-//! run time, applied with the multi-statement runner): M1 stops before the two stage migrations,
-//! inserts legacy `sales_stage`-shaped rows (including a hand-corrupted won probability), then
-//! applies the held-back pair in order and pins the mapping; M2 applies the FULL chain on an empty
-//! database (no organization schema) and pins the fresh path.
+//! run time, applied with the multi-statement runner): M1 stops before the two stage migrations
+//! AND the tenancy strip (it pins the reshape's own behavior on the historical, company-keyed
+//! shape) — it inserts legacy `sales_stage`-shaped rows (including a hand-corrupted won
+//! probability), then applies the held-back pair in order and asserts the mapping; M2 applies the
+//! FULL chain on an empty database (no organization schema) and pins both the reshape's fresh
+//! path and the strip's outcome: no company column, no company policies, the RLS enable/force
+//! flags the decorator inherits left armed.
 //!
 //! Scratch databases are created inside the shared dev container and dropped when the golden
 //! finishes (and before it starts, so re-runs converge).
@@ -15,17 +18,20 @@ use uuid::Uuid;
 
 const MIGRATIONS_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/migrations");
 
-/// The two migrations under test, identified by filename prefix in sort order.
+/// The migrations under test, identified by filename prefix in sort order.
 const STAGE_TABLE_MIGRATION: &str = "20260821130001_create_stage_table";
 const STAGE_RESHAPE_MIGRATION: &str = "20260821130002_stage_ref_reshape";
+/// The tenancy strip — held back in M1 (which pins the reshape on the historical, company-keyed
+/// shape) and applied as part of the full chain in M2.
+const STRIP_MIGRATION: &str = "20260910120300_strip_tenancy";
 
 fn admin_url() -> String {
     // DATABASE_URL points at the module's scratch DB; the admin connection swaps the path for
-    // the container's maintenance database (createdb/dropdb need it).
+    // the maintenance database (createdb/dropdb need it).
     let url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://serpa:serpa_dev_password@127.0.0.1:5432/deal_stage_goldens".into());
+        .unwrap_or_else(|_| "postgresql://postgres:postgres@127.0.0.1:5433/deal_stage_goldens".into());
     let (prefix, _) = url.rsplit_once('/').expect("DATABASE_URL with a database path");
-    format!("{prefix}/serpa")
+    format!("{prefix}/postgres")
 }
 
 async fn admin_pool() -> PgPool {
@@ -99,8 +105,9 @@ async fn golden_backfill_maps_enum_to_stages() {
     let admin = admin_pool().await;
     let pool = recreate(&admin, "deal_stage_migration_m1").await;
 
-    // The pre-reshape chain: everything except the two stage migrations.
-    apply_all(&pool, &[STAGE_TABLE_MIGRATION, STAGE_RESHAPE_MIGRATION]).await;
+    // The pre-strip chain: everything except the two stage migrations and the tenancy strip —
+    // this golden pins the reshape's own mapping on the historical company-keyed shape.
+    apply_all(&pool, &[STAGE_TABLE_MIGRATION, STAGE_RESHAPE_MIGRATION, STRIP_MIGRATION]).await;
 
     let company = Uuid::new_v4();
     let mk = |id: Uuid, stage: &str, probability: &str, status: &str| {
@@ -229,8 +236,9 @@ async fn golden_backfill_maps_enum_to_stages() {
 }
 
 /// M2: the full chain applies clean on an empty database (no organization schema — the seed's
-/// organization branch is skipped), stages stay empty with no companies, and the strict fence is
-/// armed on deal.stages.
+/// organization branch is skipped), stages stay empty, and the tenancy strip lands: no company_id
+/// column and no company isolation policy survives on any deal table, while the RLS enable/force
+/// flags the composing decorator inherits stay armed on deal.stages.
 #[tokio::test]
 async fn golden_fresh_database_chain() {
     let admin = admin_pool().await;
@@ -244,15 +252,36 @@ async fn golden_fresh_database_chain() {
         .unwrap();
     assert_eq!(stages, 0, "no companies exist — nothing was seeded");
 
-    let fenced: i64 = sqlx::query_scalar(
-        "SELECT count(*) FROM pg_policies \
-         WHERE schemaname='deal' AND tablename='stages' AND policyname='stages_company_isolation'",
+    // The strip: no company column on any of the four tables.
+    let company_cols: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM information_schema.columns \
+         WHERE table_schema='deal' AND column_name='company_id'",
     )
     .fetch_one(&pool)
     .await
     .unwrap();
-    assert_eq!(fenced, 1, "the strict company fence is armed on deal.stages");
+    assert_eq!(company_cols, 0, "the company_id column is stripped from every deal table");
 
+    // …and no company isolation policy survives anywhere in the schema.
+    let company_policies: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM pg_policies WHERE schemaname='deal' AND policyname LIKE '%_company_isolation'",
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    assert_eq!(company_policies, 0, "every company isolation policy is dropped");
+
+    // …and no company-leading index survives.
+    let company_indexes: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM pg_indexes WHERE schemaname='deal' AND indexname LIKE '%company_id%'",
+    )
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    assert_eq!(company_indexes, 0, "every company-leading index is dropped");
+
+    // The RLS flags are NOT the strip's to touch: the reshape armed enable+force on deal.stages
+    // and the decorator inherits them as-is.
     let forced: bool = sqlx::query_scalar(
         "SELECT relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace \
          WHERE n.nspname='deal' AND c.relname='stages'",
@@ -260,7 +289,7 @@ async fn golden_fresh_database_chain() {
     .fetch_one(&pool)
     .await
     .unwrap();
-    assert!(forced, "RLS is forced on deal.stages");
+    assert!(forced, "RLS stays forced on deal.stages (the decorator owns the flags now)");
 
     let checks: Vec<String> = sqlx::query_scalar(
         "SELECT conname FROM pg_constraint \

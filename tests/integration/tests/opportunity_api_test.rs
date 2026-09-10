@@ -24,7 +24,6 @@ impl TestDataGenerator for OpportunityTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": Uuid::new_v4().to_string(),
-            "company_id": Uuid::new_v4().to_string(),
             "opportunity_name": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "lead_id": null,
             "party_id": null,
@@ -51,7 +50,6 @@ impl TestDataGenerator for OpportunityTestData {
         let now = Utc::now().to_rfc3339();
         json!({
             "id": id,
-            "company_id": Uuid::new_v4().to_string(),
             "opportunity_name": format!("Test {}", Uuid::new_v4().to_string().split('-').next().unwrap()),
             "lead_id": null,
             "party_id": null,

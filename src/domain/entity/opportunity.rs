@@ -51,7 +51,6 @@ impl std::ops::Deref for OpportunityId {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Opportunity {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub opportunity_name: String,
     pub lead_id: Option<Uuid>,
     pub party_id: Option<Uuid>,
@@ -82,10 +81,9 @@ impl Opportunity {
     }
 
     /// Create a new Opportunity with required fields
-    pub fn new(company_id: Uuid, opportunity_name: String, stage_id: Uuid, currency: String, expected_amount: Decimal, probability: Decimal, status: OpportunityStatus, active: bool) -> Self {
+    pub fn new(opportunity_name: String, stage_id: Uuid, currency: String, expected_amount: Decimal, probability: Decimal, status: OpportunityStatus, active: bool) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id,
             opportunity_name,
             lead_id: None,
             party_id: None,
@@ -242,9 +240,6 @@ impl Opportunity {
     pub fn apply_patch(&mut self, fields: std::collections::HashMap<String, serde_json::Value>) {
         for (key, value) in fields {
             match key.as_str() {
-                "company_id" => {
-                    if let Ok(v) = serde_json::from_value(value) { self.company_id = v; }
-                }
                 "opportunity_name" => {
                     if let Ok(v) = serde_json::from_value(value) { self.opportunity_name = v; }
                 }
@@ -353,7 +348,6 @@ impl backbone_orm::EntityRepoMeta for Opportunity {
     fn column_types() -> std::collections::HashMap<String, String> {
         let mut m = std::collections::HashMap::new();
         m.insert("id".to_string(), "uuid".to_string());
-        m.insert("company_id".to_string(), "uuid".to_string());
         m.insert("lead_id".to_string(), "uuid".to_string());
         m.insert("party_id".to_string(), "uuid".to_string());
         m.insert("campaign_id".to_string(), "uuid".to_string());
@@ -367,9 +361,6 @@ impl backbone_orm::EntityRepoMeta for Opportunity {
     fn search_fields() -> &'static [&'static str] {
         &["opportunity_name", "currency"]
     }
-    fn company_field() -> Option<&'static str> {
-        Some("company_id")
-    }
 }
 
 /// Builder for Opportunity entity
@@ -378,7 +369,6 @@ impl backbone_orm::EntityRepoMeta for Opportunity {
 /// System fields (id, metadata, timestamps) are auto-initialized.
 #[derive(Debug, Clone, Default)]
 pub struct OpportunityBuilder {
-    company_id: Option<Uuid>,
     opportunity_name: Option<String>,
     lead_id: Option<Uuid>,
     party_id: Option<Uuid>,
@@ -400,12 +390,6 @@ pub struct OpportunityBuilder {
 }
 
 impl OpportunityBuilder {
-    /// Set the company_id field (required)
-    pub fn company_id(mut self, value: Uuid) -> Self {
-        self.company_id = Some(value);
-        self
-    }
-
     /// Set the opportunity_name field (required)
     pub fn opportunity_name(mut self, value: String) -> Self {
         self.opportunity_name = Some(value);
@@ -518,13 +502,11 @@ impl OpportunityBuilder {
     ///
     /// Returns Err if any required field without a default is missing.
     pub fn build(self) -> Result<Opportunity, String> {
-        let company_id = self.company_id.ok_or_else(|| "company_id is required".to_string())?;
         let opportunity_name = self.opportunity_name.ok_or_else(|| "opportunity_name is required".to_string())?;
         let stage_id = self.stage_id.ok_or_else(|| "stage_id is required".to_string())?;
 
         Ok(Opportunity {
             id: Uuid::new_v4(),
-            company_id,
             opportunity_name,
             lead_id: self.lead_id,
             party_id: self.party_id,

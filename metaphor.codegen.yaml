@@ -36,5 +36,10 @@ user_owned:
   - "tests/stage_migration_goldens.rs"
   # - "tests/integrity_probes.rs"
 
+  # Hand-authored migrations (the composition-artifact strip — the strip's ordering guard
+  # is hand-authored logic, not schema-derived emission).
+  - "migrations/20260910120000_strip_tenancy.up.sql"
+  - "migrations/20260910120000_strip_tenancy.down.sql"
+
   # Hand-authored module documentation.
   - "docs/**"

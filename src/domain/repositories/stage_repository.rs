@@ -7,7 +7,6 @@
 
 use async_trait::async_trait;
 use anyhow::Result;
-use uuid::Uuid;
 
 use crate::domain::entity::Stage;
 
@@ -44,7 +43,6 @@ pub struct StagePaginatedResult {
 /// Filter parameters for list queries
 #[derive(Debug, Clone, Default)]
 pub struct StageFilter {
-    pub company_id: Option<Uuid>,
     pub code: Option<String>,
     pub name: Option<String>,
     pub is_won: Option<bool>,
@@ -54,7 +52,7 @@ pub struct StageFilter {
 impl StageFilter {
     /// Check if any filter is set
     pub fn has_filters(&self) -> bool {
-        self.company_id.is_some() || self.code.is_some() || self.name.is_some() || self.is_won.is_some() || self.active.is_some()
+        self.code.is_some() || self.name.is_some() || self.is_won.is_some() || self.active.is_some()
     }
 }
 

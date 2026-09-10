@@ -12,10 +12,12 @@
 module: deal
 version: 2
 schema: deal
+# Tenancy: none, by design (ADR-0029). The module is tenant-agnostic and reusable —
+# it ships no scoping column and no fence declaration. A composing backend-service
+# that wants these tables org-scoped declares them in its tenancy.yaml; the
+# decorator installs org_unit_id, the RLS policy, and per-unit uniques at
+# composition time.
 description: "sales pipeline — opportunity + items + campaign attribution; posts no GL"
-
-# ADR-0014 posture: every table carries company_id and the ADR-0008 RLS fence.
-company_fence: strict
 
 config:
   database: postgresql

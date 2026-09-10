@@ -1491,15 +1491,11 @@ components:
       type: object
       required:
         - id
-        - company_id
         - campaign_name
         - status
         - metadata
       properties:
         id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         campaign_name:
@@ -1538,14 +1534,10 @@ components:
     CreateCampaignRequest:
       type: object
       required:
-        - company_id
         - campaign_name
         - status
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         campaign_name:
           type: string
           maxLength: 140
@@ -1569,14 +1561,10 @@ components:
     UpdateCampaignRequest:
       type: object
       required:
-        - company_id
         - campaign_name
         - status
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         campaign_name:
           type: string
           maxLength: 140
@@ -1600,9 +1588,6 @@ components:
     PatchCampaignRequest:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
         campaign_name:
           type: string
           maxLength: 140
@@ -1637,7 +1622,6 @@ components:
       type: object
       required:
         - id
-        - company_id
         - opportunity_name
         - stage_id
         - currency
@@ -1648,9 +1632,6 @@ components:
         - metadata
       properties:
         id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         opportunity_name:
@@ -1732,7 +1713,6 @@ components:
     CreateOpportunityRequest:
       type: object
       required:
-        - company_id
         - opportunity_name
         - stage_id
         - currency
@@ -1742,9 +1722,6 @@ components:
         - active
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         opportunity_name:
           type: string
           maxLength: 140
@@ -1811,7 +1788,6 @@ components:
     UpdateOpportunityRequest:
       type: object
       required:
-        - company_id
         - opportunity_name
         - stage_id
         - currency
@@ -1821,9 +1797,6 @@ components:
         - active
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         opportunity_name:
           type: string
           maxLength: 140
@@ -1890,9 +1863,6 @@ components:
     PatchOpportunityRequest:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
         opportunity_name:
           type: string
           maxLength: 140
@@ -1971,7 +1941,6 @@ components:
       required:
         - id
         - opportunity_id
-        - company_id
         - item_id
         - quantity
         - rate
@@ -1982,9 +1951,6 @@ components:
           type: string
           format: uuid
         opportunity_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         item_id:
@@ -2020,7 +1986,6 @@ components:
       type: object
       required:
         - opportunity_id
-        - company_id
         - item_id
         - quantity
         - rate
@@ -2028,9 +1993,6 @@ components:
         - metadata
       properties:
         opportunity_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         item_id:
@@ -2053,7 +2015,6 @@ components:
       type: object
       required:
         - opportunity_id
-        - company_id
         - item_id
         - quantity
         - rate
@@ -2061,9 +2022,6 @@ components:
         - metadata
       properties:
         opportunity_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         item_id:
@@ -2086,9 +2044,6 @@ components:
       type: object
       properties:
         opportunity_id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         item_id:
@@ -2121,7 +2076,6 @@ components:
       type: object
       required:
         - id
-        - company_id
         - code
         - name
         - sequence
@@ -2131,9 +2085,6 @@ components:
         - metadata
       properties:
         id:
-          type: string
-          format: uuid
-        company_id:
           type: string
           format: uuid
         code:
@@ -2170,7 +2121,6 @@ components:
     CreateStageRequest:
       type: object
       required:
-        - company_id
         - code
         - name
         - sequence
@@ -2179,9 +2129,6 @@ components:
         - active
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         code:
           type: string
           maxLength: 40
@@ -2203,7 +2150,6 @@ components:
     UpdateStageRequest:
       type: object
       required:
-        - company_id
         - code
         - name
         - sequence
@@ -2212,9 +2158,6 @@ components:
         - active
         - metadata
       properties:
-        company_id:
-          type: string
-          format: uuid
         code:
           type: string
           maxLength: 40
@@ -2236,9 +2179,6 @@ components:
     PatchStageRequest:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
         code:
           type: string
           maxLength: 40

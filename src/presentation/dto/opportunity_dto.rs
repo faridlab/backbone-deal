@@ -34,9 +34,6 @@ use crate::domain::entity::OpportunityStatus;
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateOpportunityDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "opportunity_name")]
@@ -91,9 +88,6 @@ pub struct CreateOpportunityDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateOpportunityDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(alias = "company_id")]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(alias = "opportunity_name")]
@@ -148,9 +142,6 @@ pub struct UpdateOpportunityDto {
 #[cfg_attr(feature = "validation", derive(Validate))]
 #[serde(rename_all = "camelCase")]
 pub struct PatchOpportunityDto {
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    #[serde(skip_serializing_if = "Option::is_none", alias = "company_id")]
-    pub company_id: Option<Uuid>,
     #[cfg_attr(feature = "validation", validate(length(max = 140)))]
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "opportunity_name")]
@@ -199,7 +190,7 @@ pub struct PatchOpportunityDto {
 impl PatchOpportunityDto {
     /// Check if any field is set
     pub fn has_changes(&self) -> bool {
-        self.company_id.is_some() || self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.stage_id.is_some() || self.owner_user_id.is_some() || self.sales_team_id.is_some() || self.currency.is_some() || self.expected_amount.is_some() || self.probability.is_some() || self.expected_close_date.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some() || self.active.is_some() || self.date_last_stage_update.is_some() || self.date_closed.is_some()
+        self.opportunity_name.is_some() || self.lead_id.is_some() || self.party_id.is_some() || self.campaign_id.is_some() || self.stage_id.is_some() || self.owner_user_id.is_some() || self.sales_team_id.is_some() || self.currency.is_some() || self.expected_amount.is_some() || self.probability.is_some() || self.expected_close_date.is_some() || self.status.is_some() || self.quotation_id.is_some() || self.lost_reason.is_some() || self.competitor.is_some() || self.active.is_some() || self.date_last_stage_update.is_some() || self.date_closed.is_some()
     }
 }
 
@@ -217,8 +208,6 @@ impl PatchOpportunityDto {
 pub struct OpportunityResponseDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     pub id: Uuid,
-    #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
-    pub company_id: Uuid,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub opportunity_name: String,
     pub lead_id: Option<Uuid>,
@@ -298,9 +287,9 @@ impl OpportunityListResponseDto {
 #[serde(rename_all = "camelCase")]
 pub struct OpportunitySummaryDto {
     pub id: Uuid,
-    pub company_id: Uuid,
     pub opportunity_name: String,
     pub lead_id: Option<Uuid>,
+    pub party_id: Option<Uuid>,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -312,7 +301,6 @@ impl From<Opportunity> for OpportunityResponseDto {
     fn from(entity: Opportunity) -> Self {
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             opportunity_name: entity.opportunity_name,
             lead_id: entity.lead_id,
             party_id: entity.party_id,
@@ -341,9 +329,9 @@ impl From<Opportunity> for OpportunitySummaryDto {
         let created_at = backbone_core::PersistentEntity::created_at(&entity);
         Self {
             id: entity.id,
-            company_id: entity.company_id,
             opportunity_name: entity.opportunity_name,
             lead_id: entity.lead_id,
+            party_id: entity.party_id,
             created_at,
         }
     }
@@ -353,7 +341,6 @@ impl From<CreateOpportunityDto> for Opportunity {
     fn from(dto: CreateOpportunityDto) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id: dto.company_id,
             opportunity_name: dto.opportunity_name,
             lead_id: dto.lead_id,
             party_id: dto.party_id,
@@ -381,7 +368,6 @@ impl From<&Opportunity> for OpportunityResponseDto {
     fn from(entity: &Opportunity) -> Self {
         Self {
             id: entity.id.clone(),
-            company_id: entity.company_id.clone(),
             opportunity_name: entity.opportunity_name.clone(),
             lead_id: entity.lead_id.clone(),
             party_id: entity.party_id.clone(),
@@ -413,7 +399,6 @@ impl backbone_core::FromCreateDto<CreateOpportunityDto> for Opportunity {
 
 impl backbone_core::ApplyUpdateDto<UpdateOpportunityDto> for Opportunity {
     fn apply_update(mut self, dto: UpdateOpportunityDto) -> backbone_core::ServiceResult<Self> {
-        self.company_id = dto.company_id;
         self.opportunity_name = dto.opportunity_name;
         self.lead_id = dto.lead_id;
         self.party_id = dto.party_id;

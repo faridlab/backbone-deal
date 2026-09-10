@@ -49,7 +49,6 @@ impl From<CampaignId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CampaignDto {
     pub id: CampaignId,
-    pub company_id: Uuid,
     pub campaign_name: String,
     pub utm_source: Option<String>,
     pub utm_medium: Option<String>,
@@ -110,7 +109,6 @@ impl From<OpportunityId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OpportunityDto {
     pub id: OpportunityId,
-    pub company_id: Uuid,
     pub opportunity_name: String,
     pub lead_id: Option<Uuid>,
     pub party_id: Option<Uuid>,
@@ -185,7 +183,6 @@ impl From<OpportunityItemId> for Uuid {
 pub struct OpportunityItemDto {
     pub id: OpportunityItemId,
     pub opportunity_id: Uuid,
-    pub company_id: Uuid,
     pub item_id: Uuid,
     pub description: Option<String>,
     pub quantity: Decimal,
@@ -244,7 +241,6 @@ impl From<StageId> for Uuid {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StageDto {
     pub id: StageId,
-    pub company_id: Uuid,
     pub code: String,
     pub name: String,
     pub sequence: i32,
