@@ -1,6 +1,6 @@
 [package]
 name = "backbone-deal"
-version = "0.3.1"
+version = "0.3.3"
 edition = "2021"
 description = "Sales pipeline — opportunity + items + campaign attribution; posts no GL"
 
