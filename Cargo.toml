@@ -1,6 +1,6 @@
 [package]
 name = "backbone-deal"
-version = "0.3.20"
+version = "0.3.21"
 edition = "2021"
 description = "Sales pipeline — opportunity + items + campaign attribution; posts no GL"
 license = "MIT OR Apache-2.0"
