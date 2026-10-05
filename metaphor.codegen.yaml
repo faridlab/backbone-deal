@@ -29,6 +29,8 @@ user_owned:
   - "src/infrastructure/persistence/opportunity_repository.rs"
   - "src/infrastructure/persistence/opportunity_item_repository.rs"
   - "src/presentation/http/guarded_routes.rs"
+  # The composer-installed request-pool shim the write service resolves its database through (ADR-0029 pool law): hand-written, never schema-derived.
+  - "src/request_pool.rs"
 
   # Behavior tests (the golden cases / oracle) + BDD features.
   - "tests/features/**"

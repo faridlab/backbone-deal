@@ -201,4 +201,12 @@ pub fn create_guarded_deal_routes(
         // fields are computed and move only through the verbs below.
         .merge(create_stage_write_routes(m.stage_service.clone()))
         .merge(create_deal_verb_routes(write, selling, sink, verifier))
+
+        // Bind the composer's request pool (ADR-0029 pool law) for the verbs:
+        // under a tenant mount the writes go to the tenant's database; without
+        // one the composed pool stays the fallback. Applied AFTER the routes —
+        // a Router layer only wraps what was registered before the call.
+        .layer(axum::middleware::from_fn(
+            crate::request_pool::bind_request_pool,
+        ))
 }

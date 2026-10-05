@@ -95,6 +95,13 @@ impl DealWriteService {
         Self { pool, opportunities, opportunity_items }
     }
 
+    /// The database this call runs on: the composer's request pool when one
+    /// is bound (a tenant mount, or a relay consumer wrapped by the host),
+    /// else the composed pool (ADR-0029 pool law).
+    fn rpool(&self) -> PgPool {
+        crate::request_pool::current().unwrap_or_else(|| self.pool.clone())
+    }
+
     /// The company id for the seams that still key on one — the selling handoff
     /// (`QuotationFromOpp`) and the outcome events. Sourced from the ambient org scope the
     /// COMPOSING service binds; absent → fail-closed. The module never guesses a company.
@@ -124,7 +131,7 @@ impl DealWriteService {
         // connection when the composing service bound one, so its row-level fence decides.
         let stage = self
             .opportunities
-            .find_stage_for_move(&self.pool, to_stage_id)
+            .find_stage_for_move(&self.rpool(), to_stage_id)
             .await?
             .ok_or(DealError::StageNotFound(to_stage_id))?;
         if !stage.active {
@@ -132,7 +139,7 @@ impl DealWriteService {
         }
         let moved = self
             .opportunities
-            .advance_stage(&self.pool, opportunity_id, to_stage_id, probability)
+            .advance_stage(&self.rpool(), opportunity_id, to_stage_id, probability)
             .await?
             .ok_or(DealError::InvalidState("opportunity is not open"))?;
         Ok(StageMoveOutcome {
@@ -156,7 +163,7 @@ impl DealWriteService {
         // one is bound, so a row the composing decorator's fence excludes simply is not found.
         let opp = self
             .opportunities
-            .find_for_win(&self.pool, opportunity_id)
+            .find_for_win(&self.rpool(), opportunity_id)
             .await?
             .ok_or(DealError::NotFound("opportunity"))?;
         let amount: Decimal = opp.expected_amount;
@@ -183,13 +190,13 @@ impl DealWriteService {
         // in the caller's scope.
         let won_stage_id = self
             .opportunities
-            .pick_won_stage(&self.pool)
+            .pick_won_stage(&self.rpool())
             .await?
             .ok_or(DealError::InvalidState("no active won stage is configured"))?;
 
         let line_rows: Vec<OppItemLineRow> = self
             .opportunity_items
-            .list_lines(&self.pool, opportunity_id)
+            .list_lines(&self.rpool(), opportunity_id)
             .await?;
         let lines: Vec<OppLine> = line_rows
             .iter()
@@ -208,10 +215,10 @@ impl DealWriteService {
         // Gate: claim the win exactly once.
         let moved = self
             .opportunities
-            .claim_win(&self.pool, opportunity_id, ack.quotation_id, won_stage_id)
+            .claim_win(&self.rpool(), opportunity_id, ack.quotation_id, won_stage_id)
             .await?;
         if moved != 1 {
-            let q: Uuid = self.opportunities.fetch_quotation_id(&self.pool, opportunity_id).await?;
+            let q: Uuid = self.opportunities.fetch_quotation_id(&self.rpool(), opportunity_id).await?;
             return Ok(WinOutcome { quotation_id: q, amount, already: true });
         }
         sink.publish(&DealEvent::OpportunityWon(OpportunityWon {
@@ -238,7 +245,7 @@ impl DealWriteService {
         // bound, so the composing decorator's fence decides what is updatable.
         let lost = self
             .opportunities
-            .lose(&self.pool, opportunity_id, lost_reason.as_deref(), competitor.as_deref())
+            .lose(&self.rpool(), opportunity_id, lost_reason.as_deref(), competitor.as_deref())
             .await?;
         if !lost {
             return Err(DealError::InvalidState("opportunity is not open"));
