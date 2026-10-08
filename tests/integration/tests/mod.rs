@@ -12,7 +12,6 @@ pub mod opportunity_item_api_test;
 pub mod stage_api_test;
 
 // Re-exports for convenience
-pub use crud_test_base::*;
 pub use campaign_api_test::*;
 pub use opportunity_api_test::*;
 pub use opportunity_item_api_test::*;

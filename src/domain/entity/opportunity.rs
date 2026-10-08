@@ -316,6 +316,9 @@ impl super::Entity for Opportunity {
 }
 
 impl backbone_core::PersistentEntity for Opportunity {
+    fn write_protected_fields() -> &'static [&'static str] {
+        &["status"]
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }
@@ -356,6 +359,9 @@ impl backbone_orm::EntityRepoMeta for Opportunity {
         m.insert("sales_team_id".to_string(), "uuid".to_string());
         m.insert("quotation_id".to_string(), "uuid".to_string());
         m.insert("status".to_string(), "opportunity_status".to_string());
+        m.insert("expected_close_date".to_string(), "timestamptz".to_string());
+        m.insert("date_last_stage_update".to_string(), "timestamptz".to_string());
+        m.insert("date_closed".to_string(), "timestamptz".to_string());
         m
     }
     fn search_fields() -> &'static [&'static str] {
