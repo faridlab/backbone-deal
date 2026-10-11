@@ -11,10 +11,6 @@ mod stage_repository;
 
 // Custom persistence modules
 // <<< CUSTOM
-pub use opportunity_repository::{
-    DEFAULT_STAGES, NewOpportunityRow, OpportunityForWinRow, StageMoveRow, StageProbeRow,
-};
-pub use opportunity_item_repository::{NewOppItemRow, OppItemLineRow};
 // END CUSTOM
 
 // Re-exports
@@ -33,3 +29,6 @@ pub use backbone_orm::repository::{
 // Re-export custom persistence types
 // <<< CUSTOM
 // END CUSTOM
+
+// This directory's extension (hand-written; ADR-0031).
+include!("mod.ext.rs");

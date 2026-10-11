@@ -13,8 +13,6 @@ pub mod opportunity_item_service;
 pub mod stage_service;
 
 // <<< CUSTOM
-pub mod deal_ports;
-pub mod deal_write_service;
 // END CUSTOM
 
 pub use campaign_service::CampaignService;
@@ -22,6 +20,7 @@ pub use opportunity_service::OpportunityService;
 pub use opportunity_item_service::OpportunityItemService;
 pub use stage_service::StageService;
 // <<< CUSTOM
-pub use deal_ports::{SellingPort, QuotationFromOpp, OppLine, QuotationAck, CrmRejected};
-pub use deal_write_service::{DealWriteService, WinOutcome, DealError};
 // END CUSTOM
+
+// This directory's extension (hand-written; ADR-0031).
+include!("mod.ext.rs");

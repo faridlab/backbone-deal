@@ -11,7 +11,6 @@ pub mod opportunity_item_handler;
 pub mod stage_handler;
 
 // <<< CUSTOM
-pub mod guarded_routes;
 // END CUSTOM
 
 // Re-exports
@@ -20,5 +19,7 @@ pub use opportunity_handler::{create_opportunity_routes, create_opportunity_read
 pub use opportunity_item_handler::{create_opportunity_item_routes, create_opportunity_item_read_routes, create_opportunity_item_write_routes};
 pub use stage_handler::{create_stage_routes, create_stage_read_routes, create_stage_write_routes};
 // <<< CUSTOM
-pub use guarded_routes::create_guarded_deal_routes;
 // END CUSTOM
+
+// This directory's extension (hand-written; ADR-0031).
+include!("mod.ext.rs");

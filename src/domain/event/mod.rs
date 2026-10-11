@@ -21,8 +21,7 @@ pub use stage_events::{StageEvent, StageEventPublisher, NoopStageEventPublisher}
 pub use stage_event_handlers::StageEventHandler;
 
 // <<< CUSTOM
-pub mod deal_outcome_events;
-pub use deal_outcome_events::{
-    OpportunityWon, OpportunityLost, DealEvent, DealEventSink, LoggingDealSink,
-};
 // END CUSTOM
+
+// This directory's extension (hand-written; ADR-0031).
+include!("mod.ext.rs");
