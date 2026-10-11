@@ -16,9 +16,5 @@ pub type OpportunityItemValidator = EntityValidator<OpportunityItem>;
 pub fn opportunity_item_validator() -> OpportunityItemValidator {
     EntityValidator::new()
         .rule(OptionalNotBlank::new("description", |e: &OpportunityItem| e.description.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

@@ -11,5 +11,3 @@ pub mod opportunity_specification;
 pub mod opportunity_item_specification;
 pub mod stage_specification;
 
-// <<< CUSTOM
-// END CUSTOM

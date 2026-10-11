@@ -32,5 +32,3 @@ pub type OpportunityService = GenericCrudService<
     OpportunityRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

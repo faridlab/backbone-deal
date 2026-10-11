@@ -19,9 +19,5 @@ pub fn opportunity_validator() -> OpportunityValidator {
         .rule(RequiredString::new("currency", |e: &Opportunity| &e.currency))
         .rule(OptionalNotBlank::new("lost_reason", |e: &Opportunity| e.lost_reason.as_deref()))
         .rule(OptionalNotBlank::new("competitor", |e: &Opportunity| e.competitor.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

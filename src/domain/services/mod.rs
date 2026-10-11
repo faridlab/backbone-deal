@@ -12,5 +12,3 @@ pub use opportunity_domain_policy::OpportunityDomainPolicy;
 pub use opportunity_item_domain_policy::OpportunityItemDomainPolicy;
 pub use stage_domain_policy::StageDomainPolicy;
 
-// <<< CUSTOM
-// END CUSTOM

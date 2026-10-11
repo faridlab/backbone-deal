@@ -18,5 +18,3 @@ use crate::domain::entity::OpportunityItem;
 /// service. `PermitAllPolicy` is the safe default until then.
 pub type OpportunityItemDomainPolicy = PermitAllPolicy<OpportunityItem>;
 
-// <<< CUSTOM
-// END CUSTOM

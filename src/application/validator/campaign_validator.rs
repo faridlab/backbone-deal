@@ -19,9 +19,5 @@ pub fn campaign_validator() -> CampaignValidator {
         .rule(OptionalNotBlank::new("utm_source", |e: &Campaign| e.utm_source.as_deref()))
         .rule(OptionalNotBlank::new("utm_medium", |e: &Campaign| e.utm_medium.as_deref()))
         .rule(OptionalNotBlank::new("utm_campaign", |e: &Campaign| e.utm_campaign.as_deref()))
-    // <<< CUSTOM RULES
-    // END CUSTOM RULES
 }
 
-// <<< CUSTOM
-// END CUSTOM

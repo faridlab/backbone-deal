@@ -143,6 +143,4 @@ mod tests {
 // CUSTOM TESTS
 // ============================================================================
 
-// <<< CUSTOM TESTS START >>>
 // Add Opportunity specific tests here
-// <<< CUSTOM TESTS END >>>

@@ -32,5 +32,3 @@ pub type CampaignService = GenericCrudService<
     CampaignRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

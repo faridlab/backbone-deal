@@ -172,8 +172,6 @@ impl OpportunityItem {
         }
     }
 
-    // <<< CUSTOM METHODS START >>>
-    // <<< CUSTOM METHODS END >>>
 }
 
 impl super::Entity for OpportunityItem {

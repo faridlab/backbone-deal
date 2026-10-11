@@ -12,15 +12,11 @@ pub mod opportunity_service;
 pub mod opportunity_item_service;
 pub mod stage_service;
 
-// <<< CUSTOM
-// END CUSTOM
 
 pub use campaign_service::CampaignService;
 pub use opportunity_service::OpportunityService;
 pub use opportunity_item_service::OpportunityItemService;
 pub use stage_service::StageService;
-// <<< CUSTOM
-// END CUSTOM
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

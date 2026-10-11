@@ -24,8 +24,6 @@ pub mod application;
 pub mod presentation;
 pub mod seeders;
 pub mod exports;
-// <<< CUSTOM MODULES
-// END CUSTOM
 
 // Re-exports for convenience - Domain entities
 pub use domain::entity::*;
@@ -60,8 +58,6 @@ pub struct DealModule {
     pub(crate) opportunity_service: Arc<OpportunityService>,
     pub(crate) opportunity_item_service: Arc<OpportunityItemService>,
     pub(crate) stage_service: Arc<StageService>,
-    // <<< CUSTOM FIELDS
-    // END CUSTOM
 }
 
 impl DealModule {
@@ -120,15 +116,11 @@ impl DealModule {
             .merge(create_stage_read_routes(self.stage_service.clone()))
     }
 
-    // <<< CUSTOM METHODS
-    // END CUSTOM
 }
 
 /// Builder for DealModule
 pub struct DealModuleBuilder {
     db_pool: Option<PgPool>,
-    // <<< CUSTOM BUILDER FIELDS
-    // END CUSTOM
 }
 
 impl DealModuleBuilder {
@@ -136,8 +128,6 @@ impl DealModuleBuilder {
     pub fn new() -> Self {
         Self {
             db_pool: None,
-            // <<< CUSTOM BUILDER DEFAULTS
-            // END CUSTOM
         }
     }
 
@@ -147,8 +137,6 @@ impl DealModuleBuilder {
         self
     }
 
-    // <<< CUSTOM - custom builder methods
-    // END CUSTOM
 
     /// Build the module with configured dependencies
     pub fn build(self) -> anyhow::Result<DealModule> {
@@ -171,16 +159,12 @@ impl DealModuleBuilder {
         let stage_repository = Arc::new(StageRepository::new(db_pool.clone()));
         let stage_service = Arc::new(StageService::with_repository(stage_repository.clone()));
 
-        // <<< CUSTOM
-        // END CUSTOM
 
         Ok(DealModule {
             campaign_service,
             opportunity_service,
             opportunity_item_service,
             stage_service,
-            // <<< CUSTOM
-            // END CUSTOM
         })
     }
 }

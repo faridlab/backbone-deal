@@ -20,8 +20,6 @@ pub use opportunity_item_event_handlers::OpportunityItemEventHandler;
 pub use stage_events::{StageEvent, StageEventPublisher, NoopStageEventPublisher};
 pub use stage_event_handlers::StageEventHandler;
 
-// <<< CUSTOM
-// END CUSTOM
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

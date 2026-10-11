@@ -293,7 +293,7 @@ impl backbone_core::ApplyUpdateDto<UpdateStageDto> for Stage {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to Stage here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

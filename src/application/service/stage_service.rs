@@ -32,5 +32,3 @@ pub type StageService = GenericCrudService<
     StageRepository,
 >;
 
-// <<< CUSTOM
-// END CUSTOM

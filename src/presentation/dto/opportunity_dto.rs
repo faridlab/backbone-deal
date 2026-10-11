@@ -425,7 +425,7 @@ impl backbone_core::ApplyUpdateDto<UpdateOpportunityDto> for Opportunity {
 // Custom DTOs
 // =============================================================================
 
-// <<< CUSTOM DTOs
 // Add custom DTOs specific to Opportunity here.
 // This section will be preserved during regeneration.
 // >>> END CUSTOM DTOs
+

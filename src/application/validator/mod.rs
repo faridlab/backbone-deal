@@ -15,5 +15,3 @@ pub use opportunity_validator::{OpportunityValidator, opportunity_validator};
 pub use opportunity_item_validator::{OpportunityItemValidator, opportunity_item_validator};
 pub use stage_validator::{StageValidator, stage_validator};
 
-// <<< CUSTOM
-// END CUSTOM
