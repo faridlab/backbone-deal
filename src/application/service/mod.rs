@@ -17,6 +17,10 @@ pub use campaign_service::CampaignService;
 pub use opportunity_service::OpportunityService;
 pub use opportunity_item_service::OpportunityItemService;
 pub use stage_service::StageService;
+pub use campaign_service::CampaignRowRules;
+pub use opportunity_service::OpportunityRowRules;
+pub use opportunity_item_service::OpportunityItemRowRules;
+pub use stage_service::StageRowRules;
 
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");

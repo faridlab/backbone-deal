@@ -32,3 +32,53 @@ pub type CampaignService = GenericCrudService<
     CampaignRepository,
 >;
 
+/// The rules the schema declares for Campaign, checked against the row a create or update
+/// would store. The generated build attaches it to [`CampaignService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct CampaignRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Campaign> for CampaignRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Campaign>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `campaign_name_required` (@required on Campaign.campaign_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["campaign_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "campaign_name")), r::not(r::is_empty(r::trim(r::field(row, "campaign_name")))))) {
+            refuse.push(Violation::new("campaign_name", "required", "campaign_name is required"));
+        }
+        // `campaign_name_max_length` (@max(140) on Campaign.campaign_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["campaign_name"]))) && !r::holds(&r::le(r::length(r::field(row, "campaign_name")), r::Val::Num(140.0_f64))) {
+            shadow.push(Violation::new("campaign_name", "max_length", "campaign_name must be at most 140 characters").with_param("max", 140_i64));
+        }
+        // `utm_source_max_length` (@max(80) on Campaign.utm_source)
+        if (create || (update && r::changed(old.as_ref(), row, &["utm_source"]))) && !r::holds(&r::le(r::length(r::field(row, "utm_source")), r::Val::Num(80.0_f64))) {
+            shadow.push(Violation::new("utm_source", "max_length", "utm_source must be at most 80 characters").with_param("max", 80_i64));
+        }
+        // `utm_medium_max_length` (@max(80) on Campaign.utm_medium)
+        if (create || (update && r::changed(old.as_ref(), row, &["utm_medium"]))) && !r::holds(&r::le(r::length(r::field(row, "utm_medium")), r::Val::Num(80.0_f64))) {
+            shadow.push(Violation::new("utm_medium", "max_length", "utm_medium must be at most 80 characters").with_param("max", 80_i64));
+        }
+        // `utm_campaign_max_length` (@max(120) on Campaign.utm_campaign)
+        if (create || (update && r::changed(old.as_ref(), row, &["utm_campaign"]))) && !r::holds(&r::le(r::length(r::field(row, "utm_campaign")), r::Val::Num(120.0_f64))) {
+            shadow.push(Violation::new("utm_campaign", "max_length", "utm_campaign must be at most 120 characters").with_param("max", 120_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

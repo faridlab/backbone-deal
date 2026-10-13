@@ -32,3 +32,65 @@ pub type OpportunityService = GenericCrudService<
     OpportunityRepository,
 >;
 
+/// The rules the schema declares for Opportunity, checked against the row a create or update
+/// would store. The generated build attaches it to [`OpportunityService`]. A refusing rule's
+/// break answers 422; a rule in shadow is logged under `backbone::write_guard` and the
+/// write goes ahead.
+pub struct OpportunityRowRules;
+
+#[async_trait::async_trait]
+impl backbone_core::write_guard::WriteGuard<Opportunity> for OpportunityRowRules {
+    async fn check(
+        &self,
+        ctx: &backbone_core::write_guard::WriteCtx<'_, Opportunity>,
+    ) -> backbone_core::write_guard::GuardOutcome {
+        use backbone_core::row_rule as r;
+        use backbone_core::violation::Violation;
+        use backbone_core::write_guard::{GuardOutcome, WriteKind};
+        let (create, update) = (ctx.kind == WriteKind::Create, ctx.kind == WriteKind::Update);
+        let Some(after) = ctx.after.filter(|_| create || update) else {
+            return GuardOutcome::allow();
+        };
+        let Ok(row) = serde_json::to_value(after) else {
+            return GuardOutcome::allow();
+        };
+        let row = &row;
+        let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
+        let mut shadow = Vec::new();
+        let mut refuse = Vec::new();
+        // `opportunity_name_required` (@required on Opportunity.opportunity_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["opportunity_name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "opportunity_name")), r::not(r::is_empty(r::trim(r::field(row, "opportunity_name")))))) {
+            refuse.push(Violation::new("opportunity_name", "required", "opportunity_name is required"));
+        }
+        // `opportunity_name_max_length` (@max(140) on Opportunity.opportunity_name)
+        if (create || (update && r::changed(old.as_ref(), row, &["opportunity_name"]))) && !r::holds(&r::le(r::length(r::field(row, "opportunity_name")), r::Val::Num(140.0_f64))) {
+            shadow.push(Violation::new("opportunity_name", "max_length", "opportunity_name must be at most 140 characters").with_param("max", 140_i64));
+        }
+        // `stage_id_required` (@required on Opportunity.stage_id)
+        if (create || (update && r::changed(old.as_ref(), row, &["stage_id"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "stage_id")), r::not(r::is_empty(r::trim(r::field(row, "stage_id")))))) {
+            refuse.push(Violation::new("stage_id", "required", "stage_id is required"));
+        }
+        // `currency_length` (@length(3) on Opportunity.currency)
+        if (create || (update && r::changed(old.as_ref(), row, &["currency"]))) && !r::holds(&r::eq(r::length(r::field(row, "currency")), r::Val::Num(3.0_f64))) {
+            shadow.push(Violation::new("currency", "length", "currency must be exactly 3 characters").with_param("length", 3_i64));
+        }
+        // `expected_amount_non_negative` (@non_negative on Opportunity.expected_amount)
+        if (create || (update && r::changed(old.as_ref(), row, &["expected_amount"]))) && !r::holds(&r::ge(r::field(row, "expected_amount"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("expected_amount", "non_negative", "expected_amount must not be negative"));
+        }
+        // `probability_non_negative` (@non_negative on Opportunity.probability)
+        if (create || (update && r::changed(old.as_ref(), row, &["probability"]))) && !r::holds(&r::ge(r::field(row, "probability"), r::Val::Num(0.0_f64))) {
+            shadow.push(Violation::new("probability", "non_negative", "probability must not be negative"));
+        }
+        // `lost_reason_max_length` (@max(280) on Opportunity.lost_reason)
+        if (create || (update && r::changed(old.as_ref(), row, &["lost_reason"]))) && !r::holds(&r::le(r::length(r::field(row, "lost_reason")), r::Val::Num(280.0_f64))) {
+            shadow.push(Violation::new("lost_reason", "max_length", "lost_reason must be at most 280 characters").with_param("max", 280_i64));
+        }
+        // `competitor_max_length` (@max(140) on Opportunity.competitor)
+        if (create || (update && r::changed(old.as_ref(), row, &["competitor"]))) && !r::holds(&r::le(r::length(r::field(row, "competitor")), r::Val::Num(140.0_f64))) {
+            shadow.push(Violation::new("competitor", "max_length", "competitor must be at most 140 characters").with_param("max", 140_i64));
+        }
+        GuardOutcome { refuse, shadow }
+    }
+}
+

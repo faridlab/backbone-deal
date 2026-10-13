@@ -145,19 +145,19 @@ impl DealModuleBuilder {
 
         // Campaign service
         let campaign_repository = Arc::new(CampaignRepository::new(db_pool.clone()));
-        let campaign_service = Arc::new(CampaignService::with_repository(campaign_repository.clone()));
+        let campaign_service = Arc::new(CampaignService::with_repository(campaign_repository.clone()).with_guard(Arc::new(crate::application::service::CampaignRowRules)));
 
         // Opportunity service
         let opportunity_repository = Arc::new(OpportunityRepository::new(db_pool.clone()));
-        let opportunity_service = Arc::new(OpportunityService::with_repository(opportunity_repository.clone()));
+        let opportunity_service = Arc::new(OpportunityService::with_repository(opportunity_repository.clone()).with_guard(Arc::new(crate::application::service::OpportunityRowRules)));
 
         // OpportunityItem service
         let opportunity_item_repository = Arc::new(OpportunityItemRepository::new(db_pool.clone()));
-        let opportunity_item_service = Arc::new(OpportunityItemService::with_repository(opportunity_item_repository.clone()));
+        let opportunity_item_service = Arc::new(OpportunityItemService::with_repository(opportunity_item_repository.clone()).with_guard(Arc::new(crate::application::service::OpportunityItemRowRules)));
 
         // Stage service
         let stage_repository = Arc::new(StageRepository::new(db_pool.clone()));
-        let stage_service = Arc::new(StageService::with_repository(stage_repository.clone()));
+        let stage_service = Arc::new(StageService::with_repository(stage_repository.clone()).with_guard(Arc::new(crate::application::service::StageRowRules)));
 
 
         Ok(DealModule {
