@@ -56,7 +56,7 @@ impl backbone_core::write_guard::WriteGuard<Stage> for StageRowRules {
         };
         let row = &row;
         let old = ctx.before.and_then(|b| serde_json::to_value(b).ok());
-        let mut shadow = Vec::new();
+        let shadow = Vec::new();
         let mut refuse = Vec::new();
         // `code_required` (@required on Stage.code)
         if (create || (update && r::changed(old.as_ref(), row, &["code"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "code")), r::not(r::is_empty(r::trim(r::field(row, "code")))))) {
@@ -64,7 +64,7 @@ impl backbone_core::write_guard::WriteGuard<Stage> for StageRowRules {
         }
         // `code_max_length` (@max(40) on Stage.code)
         if (create || (update && r::changed(old.as_ref(), row, &["code"]))) && !r::holds(&r::le(r::length(r::field(row, "code")), r::Val::Num(40.0_f64))) {
-            shadow.push(Violation::new("code", "max_length", "code must be at most 40 characters").with_param("max", 40_i64));
+            refuse.push(Violation::new("code", "max_length", "code must be at most 40 characters").with_param("max", 40_i64));
         }
         // `name_required` (@required on Stage.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::and(r::is_not_null(r::field(row, "name")), r::not(r::is_empty(r::trim(r::field(row, "name")))))) {
@@ -72,15 +72,15 @@ impl backbone_core::write_guard::WriteGuard<Stage> for StageRowRules {
         }
         // `name_max_length` (@max(120) on Stage.name)
         if (create || (update && r::changed(old.as_ref(), row, &["name"]))) && !r::holds(&r::le(r::length(r::field(row, "name")), r::Val::Num(120.0_f64))) {
-            shadow.push(Violation::new("name", "max_length", "name must be at most 120 characters").with_param("max", 120_i64));
+            refuse.push(Violation::new("name", "max_length", "name must be at most 120 characters").with_param("max", 120_i64));
         }
         // `sequence_non_negative` (@non_negative on Stage.sequence)
         if (create || (update && r::changed(old.as_ref(), row, &["sequence"]))) && !r::holds(&r::ge(r::field(row, "sequence"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("sequence", "non_negative", "sequence must not be negative"));
+            refuse.push(Violation::new("sequence", "non_negative", "sequence must not be negative"));
         }
         // `probability_hint_non_negative` (@non_negative on Stage.probability_hint)
         if (create || (update && r::changed(old.as_ref(), row, &["probability_hint"]))) && !r::holds(&r::ge(r::field(row, "probability_hint"), r::Val::Num(0.0_f64))) {
-            shadow.push(Violation::new("probability_hint", "non_negative", "probability_hint must not be negative"));
+            refuse.push(Violation::new("probability_hint", "non_negative", "probability_hint must not be negative"));
         }
         GuardOutcome { refuse, shadow }
     }
