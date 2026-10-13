@@ -365,6 +365,9 @@ impl backbone_orm::EntityRepoMeta for Opportunity {
     fn search_fields() -> &'static [&'static str] {
         &["opportunity_name", "currency"]
     }
+    fn relations() -> &'static [(&'static str, &'static str, &'static str)] {
+        &[("campaign", "campaigns", "campaignId")]
+    }
 }
 
 /// Builder for Opportunity entity
