@@ -22,5 +22,37 @@ pub use opportunity_service::OpportunityRowRules;
 pub use opportunity_item_service::OpportunityItemRowRules;
 pub use stage_service::StageRowRules;
 
+/// A `CampaignService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_campaign_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::CampaignRepository>,
+) -> CampaignService {
+    CampaignService::with_repository(repository).with_guard(std::sync::Arc::new(CampaignRowRules))
+}
+
+/// A `OpportunityService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_opportunity_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::OpportunityRepository>,
+) -> OpportunityService {
+    OpportunityService::with_repository(repository).with_guard(std::sync::Arc::new(OpportunityRowRules))
+}
+
+/// A `OpportunityItemService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_opportunity_item_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::OpportunityItemRepository>,
+) -> OpportunityItemService {
+    OpportunityItemService::with_repository(repository).with_guard(std::sync::Arc::new(OpportunityItemRowRules))
+}
+
+/// A `StageService` over `repository` with its write guard attached: the way to build it, so its writes are
+/// served only with the rules the schema declares.
+pub fn build_stage_service(
+    repository: std::sync::Arc<crate::infrastructure::persistence::StageRepository>,
+) -> StageService {
+    StageService::with_repository(repository).with_guard(std::sync::Arc::new(StageRowRules))
+}
+
 // This directory's extension (hand-written; ADR-0031).
 include!("mod.ext.rs");
