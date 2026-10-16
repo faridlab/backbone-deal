@@ -53,7 +53,6 @@ pub struct CreateOpportunityDto {
     pub probability: Decimal,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "expected_close_date")]
     pub expected_close_date: Option<DateTime<Utc>>,
-    pub status: OpportunityStatus,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "quotation_id")]
     pub quotation_id: Option<Uuid>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "lost_reason")]
@@ -337,7 +336,7 @@ impl From<CreateOpportunityDto> for Opportunity {
             expected_amount: dto.expected_amount,
             probability: dto.probability,
             expected_close_date: dto.expected_close_date,
-            status: dto.status,
+            status: OpportunityStatus::Open,
             quotation_id: dto.quotation_id,
             lost_reason: dto.lost_reason,
             competitor: dto.competitor,
