@@ -47,9 +47,11 @@ pub struct CreateOpportunityDto {
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "sales_team_id")]
     pub sales_team_id: Option<Uuid>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
+    #[serde(default = "default_create_opportunity_currency")]
     pub currency: String,
-    #[serde(alias = "expected_amount")]
+    #[serde(default, alias = "expected_amount")]
     pub expected_amount: Decimal,
+    #[serde(default)]
     pub probability: Decimal,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "expected_close_date")]
     pub expected_close_date: Option<DateTime<Utc>>,
@@ -60,11 +62,20 @@ pub struct CreateOpportunityDto {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub competitor: Option<String>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
+    #[serde(default = "default_create_opportunity_active")]
     pub active: bool,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "date_last_stage_update")]
     pub date_last_stage_update: Option<DateTime<Utc>>,
     #[serde(default, skip_serializing_if = "Option::is_none", alias = "date_closed")]
     pub date_closed: Option<DateTime<Utc>>,
+}
+
+fn default_create_opportunity_currency() -> String {
+    "IDR".to_string()
+}
+
+fn default_create_opportunity_active() -> bool {
+    true
 }
 
 // =============================================================================
@@ -132,19 +143,19 @@ pub struct PatchOpportunityDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "opportunity_name")]
     pub opportunity_name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "lead_id")]
-    pub lead_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "party_id")]
-    pub party_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "campaign_id")]
-    pub campaign_id: Option<Uuid>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "lead_id")]
+    pub lead_id: Option<Option<Uuid>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "party_id")]
+    pub party_id: Option<Option<Uuid>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "campaign_id")]
+    pub campaign_id: Option<Option<Uuid>>,
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "stage_id")]
     pub stage_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "owner_user_id")]
-    pub owner_user_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "sales_team_id")]
-    pub sales_team_id: Option<Uuid>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "owner_user_id")]
+    pub owner_user_id: Option<Option<Uuid>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "sales_team_id")]
+    pub sales_team_id: Option<Option<Uuid>>,
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub currency: Option<String>,
@@ -152,23 +163,23 @@ pub struct PatchOpportunityDto {
     pub expected_amount: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub probability: Option<Decimal>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "expected_close_date")]
-    pub expected_close_date: Option<DateTime<Utc>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "expected_close_date")]
+    pub expected_close_date: Option<Option<DateTime<Utc>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<OpportunityStatus>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "quotation_id")]
-    pub quotation_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "lost_reason")]
-    pub lost_reason: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub competitor: Option<String>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "quotation_id")]
+    pub quotation_id: Option<Option<Uuid>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "lost_reason")]
+    pub lost_reason: Option<Option<String>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option")]
+    pub competitor: Option<Option<String>>,
     #[cfg_attr(feature = "openapi", schema(example = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "date_last_stage_update")]
-    pub date_last_stage_update: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "date_closed")]
-    pub date_closed: Option<DateTime<Utc>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "date_last_stage_update")]
+    pub date_last_stage_update: Option<Option<DateTime<Utc>>>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option", alias = "date_closed")]
+    pub date_closed: Option<Option<DateTime<Utc>>>,
 }
 
 impl PatchOpportunityDto {
@@ -404,12 +415,4 @@ impl backbone_core::ApplyUpdateDto<UpdateOpportunityDto> for Opportunity {
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to Opportunity here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

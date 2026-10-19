@@ -38,7 +38,9 @@ pub struct CreateOpportunityItemDto {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub quantity: Decimal,
+    #[serde(default)]
     pub rate: Decimal,
+    #[serde(default)]
     pub amount: Decimal,
 }
 
@@ -85,8 +87,8 @@ pub struct PatchOpportunityItemDto {
     #[cfg_attr(feature = "openapi", schema(example = "550e8400-e29b-41d4-a716-446655440000"))]
     #[serde(skip_serializing_if = "Option::is_none", alias = "item_id")]
     pub item_id: Option<Uuid>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    #[serde(default, deserialize_with = "crate::presentation::dto::double_option")]
+    pub description: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quantity: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -266,12 +268,4 @@ impl backbone_core::ApplyUpdateDto<UpdateOpportunityItemDto> for OpportunityItem
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to OpportunityItem here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 

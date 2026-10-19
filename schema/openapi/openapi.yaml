@@ -1535,8 +1535,6 @@ components:
       type: object
       required:
         - campaign_name
-        - status
-        - metadata
       properties:
         campaign_name:
           type: string
@@ -1555,15 +1553,12 @@ components:
           maxLength: 120
         status:
           type: string
-        metadata:
-          type: object
 
     UpdateCampaignRequest:
       type: object
       required:
         - campaign_name
         - status
-        - metadata
       properties:
         campaign_name:
           type: string
@@ -1582,8 +1577,6 @@ components:
           maxLength: 120
         status:
           type: string
-        metadata:
-          type: object
 
     PatchCampaignRequest:
       type: object
@@ -1605,8 +1598,6 @@ components:
           maxLength: 120
         status:
           type: string
-        metadata:
-          type: object
 
     CampaignList:
       type: object
@@ -1715,12 +1706,6 @@ components:
       required:
         - opportunity_name
         - stage_id
-        - currency
-        - expected_amount
-        - probability
-        - status
-        - active
-        - metadata
       properties:
         opportunity_name:
           type: string
@@ -1758,8 +1743,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        status:
-          type: string
         quotation_id:
           nullable: true
           type: string
@@ -1782,8 +1765,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     UpdateOpportunityRequest:
       type: object
@@ -1795,7 +1776,6 @@ components:
         - probability
         - status
         - active
-        - metadata
       properties:
         opportunity_name:
           type: string
@@ -1857,8 +1837,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     PatchOpportunityRequest:
       type: object
@@ -1923,8 +1901,6 @@ components:
           nullable: true
           type: string
           format: date-time
-        metadata:
-          type: object
 
     OpportunityList:
       type: object
@@ -1988,9 +1964,6 @@ components:
         - opportunity_id
         - item_id
         - quantity
-        - rate
-        - amount
-        - metadata
       properties:
         opportunity_id:
           type: string
@@ -2008,8 +1981,6 @@ components:
           type: string
         amount:
           type: string
-        metadata:
-          type: object
 
     UpdateOpportunityItemRequest:
       type: object
@@ -2019,7 +1990,6 @@ components:
         - quantity
         - rate
         - amount
-        - metadata
       properties:
         opportunity_id:
           type: string
@@ -2037,8 +2007,6 @@ components:
           type: string
         amount:
           type: string
-        metadata:
-          type: object
 
     PatchOpportunityItemRequest:
       type: object
@@ -2059,8 +2027,6 @@ components:
           type: string
         amount:
           type: string
-        metadata:
-          type: object
 
     OpportunityItemList:
       type: object
@@ -2123,11 +2089,6 @@ components:
       required:
         - code
         - name
-        - sequence
-        - is_won
-        - probability_hint
-        - active
-        - metadata
       properties:
         code:
           type: string
@@ -2144,8 +2105,6 @@ components:
           type: string
         active:
           type: boolean
-        metadata:
-          type: object
 
     UpdateStageRequest:
       type: object
@@ -2156,7 +2115,6 @@ components:
         - is_won
         - probability_hint
         - active
-        - metadata
       properties:
         code:
           type: string
@@ -2173,8 +2131,6 @@ components:
           type: string
         active:
           type: boolean
-        metadata:
-          type: object
 
     PatchStageRequest:
       type: object
@@ -2194,8 +2150,6 @@ components:
           type: string
         active:
           type: boolean
-        metadata:
-          type: object
 
     StageList:
       type: object

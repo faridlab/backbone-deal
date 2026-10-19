@@ -187,6 +187,12 @@ impl super::Entity for OpportunityItem {
 }
 
 impl backbone_core::PersistentEntity for OpportunityItem {
+    fn references() -> &'static [backbone_core::Reference] {
+        const REFERENCES: &[backbone_core::Reference] = &[
+            backbone_core::Reference::new("opportunity_id", "deal.opportunities", "id"),
+        ];
+        REFERENCES
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }

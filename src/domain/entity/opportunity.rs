@@ -317,6 +317,14 @@ impl backbone_core::PersistentEntity for Opportunity {
     fn write_protected_fields() -> &'static [&'static str] {
         &["status"]
     }
+    fn references() -> &'static [backbone_core::Reference] {
+        const REFERENCES: &[backbone_core::Reference] = &[
+            backbone_core::Reference::new("stage_id", "deal.stages", "id"),
+            backbone_core::Reference::new("campaign_id", "deal.campaigns", "id"),
+            backbone_core::Reference::new("owner_user_id", "users", "id"),
+        ];
+        REFERENCES
+    }
     fn entity_id(&self) -> String {
         self.id.to_string()
     }

@@ -34,14 +34,24 @@ pub struct CreateStageDto {
     #[cfg_attr(feature = "openapi", schema(example = "example"))]
     pub name: String,
     #[cfg_attr(feature = "openapi", schema(example = 42))]
+    #[serde(default = "default_create_stage_sequence")]
     pub sequence: i32,
     #[cfg_attr(feature = "openapi", schema(example = true))]
-    #[serde(alias = "is_won")]
+    #[serde(default, alias = "is_won")]
     pub is_won: bool,
-    #[serde(alias = "probability_hint")]
+    #[serde(default, alias = "probability_hint")]
     pub probability_hint: Decimal,
     #[cfg_attr(feature = "openapi", schema(example = true))]
+    #[serde(default = "default_create_stage_active")]
     pub active: bool,
+}
+
+fn default_create_stage_sequence() -> i32 {
+    10
+}
+
+fn default_create_stage_active() -> bool {
+    true
 }
 
 // =============================================================================
@@ -276,12 +286,4 @@ impl backbone_core::ApplyUpdateDto<UpdateStageDto> for Stage {
         Ok(self)
     }
 }
-
-// =============================================================================
-// Custom DTOs
-// =============================================================================
-
-// Add custom DTOs specific to Stage here.
-// This section will be preserved during regeneration.
-// >>> END CUSTOM DTOs
 
